@@ -1,0 +1,37 @@
+{
+  "name": "ddf",
+  "version": "0.1.0",
+  "description": "ddf",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tetsuo/ddf.git"
+  },
+  "bin": {
+    "ddf": "cmd.js"
+  },
+  "main": "lib/index.js",
+  "typings": "lib/index",
+  "scripts": {
+    "test-diff": "tape lib/**/test/*.js | tap-diff",
+    "test": "tape lib/**/test/*.js",
+    "test-watch": "npm run watch & tape-watch lib/**/test/*.js -p tap-diff",
+    "clean": "rm -fr lib && rm -f public/bundle.js",
+    "build": "npm run clean && tsc",
+    "watch": "npm run clean && tsc --watch"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "htmlparser2": "^3.9.2",
+    "stream-combiner2": "^1.1.1",
+    "through2": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/htmlparser2": "^3.7.29",
+    "@types/tape": "^4.2.29",
+    "@types/through2": "^2.0.32",
+    "tap-diff": "^0.1.1",
+    "tape": "^4.6.3",
+    "tape-watch": "^2.2.4",
+    "typescript": "^2.2.1"
+  }
+}

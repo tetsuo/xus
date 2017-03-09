@@ -1,0 +1,14 @@
+{
+	"version": "2.2.1",
+	"compilerOptions": {
+		"declaration": true,
+		"module": "commonjs",
+		"outDir": "lib",
+		"target": "es5",
+		"jsx": "react",
+		"experimentalDecorators": true
+	},
+	"include": [
+		"src/**/*.ts"
+	]
+}

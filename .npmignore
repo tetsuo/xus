@@ -1,0 +1,7 @@
+*
+!.README.md
+!package.json
+!yarn.lock
+!cmd.js
+!lib/*
+lib/test
