@@ -13,7 +13,7 @@
   "typings": "lib/index",
   "scripts": {
     "test-diff": "tape lib/**/test/*.js | tap-diff",
-    "test": "tape lib/**/test/*.js",
+    "test": "npm run build && tape lib/**/test/*.js",
     "test-watch": "npm run watch & tape-watch lib/**/test/*.js -p tap-diff",
     "clean": "rm -fr lib",
     "build": "npm run clean && tsc",
