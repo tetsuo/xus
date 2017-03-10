@@ -10,6 +10,7 @@ import {
     ITemplateRenderOptions,
     ITemplateOptions,
     IVNode,
+    IVNodeAttributes,
     IVText
 } from "./types"
 
@@ -25,7 +26,7 @@ export class Template {
         this.options = options
     }
 
-    attrsFmt(attrs: ICommonAttrs): { attributes: ICommonAttrs } | {} {
+    attrsFmt(attrs: ICommonAttrs): IVNodeAttributes {
         if (Object.keys(attrs).length) {
             return { attributes: attrs }
         }
