@@ -24,7 +24,7 @@ import through = require("through2")
  * @param tree  A parse tree.
  */
 export function toFunction(tree: INodeTupleValue[]) {
-    return (new Function("d", "m", "t", "t=t?new t:this;t.s(" + JSON.stringify(tree) + ");return t.r(d,m)"))
+    return (new Function("d", "m", "t", "t=t?new t:this;t.root=" + JSON.stringify(tree) + ";return t.render(d,m)"))
 }
 
 /**

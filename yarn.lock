@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@types/escape-html@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@types/escape-html/-/escape-html-0.0.19.tgz#595ff7bd7ee510af54517819de24abdcea6f3507"
+
 "@types/htmlparser2@^3.7.29":
   version "3.7.29"
   resolved "https://registry.yarnpkg.com/@types/htmlparser2/-/htmlparser2-3.7.29.tgz#d2ae2c9874ec8829e03f00baa4635b4229ce8cf1"
@@ -9,12 +13,6 @@
 "@types/node@*":
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.6.tgz#660f620ae761e391c64e435607234eba00e86b61"
-
-"@types/pump@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@types/pump/-/pump-1.0.0.tgz#bcd004a345b9710ce869baee2fc0b207cf61bda8"
-  dependencies:
-    "@types/node" "*"
 
 "@types/tape@^4.2.29":
   version "4.2.29"
@@ -396,6 +394,10 @@ es-to-primitive@^1.1.1:
     is-callable "^1.1.1"
     is-date-object "^1.0.1"
     is-symbol "^1.0.1"
+
+escape-html@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
 
 escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
@@ -997,15 +999,9 @@ object.omit@^2.0.0:
     for-own "^0.1.4"
     is-extendable "^0.1.1"
 
-once@1.3.3, once@~1.3.0, once@~1.3.3:
+once@1.3.3, once@^1.3.0, once@^1.3.1, once@~1.3.0, once@~1.3.3:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/once/-/once-1.3.3.tgz#b2e261557ce4c314ec8304f3fa82663e4297ca20"
-  dependencies:
-    wrappy "1"
-
-once@^1.3.0, once@^1.3.1:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/once/-/once-1.4.0.tgz#583b1aa775961d4b113ac17d9c50baef9dd76bd1"
   dependencies:
     wrappy "1"
 
@@ -1090,7 +1086,7 @@ process-nextick-args@~1.0.6:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-1.0.7.tgz#150e20b756590ad3f91093f25a4f2ad8bff30ba3"
 
-pump@^1.0.0, pump@^1.0.2:
+pump@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/pump/-/pump-1.0.2.tgz#3b3ee6512f94f0e575538c17995f9f16990a5d51"
   dependencies:

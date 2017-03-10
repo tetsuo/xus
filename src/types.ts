@@ -57,3 +57,16 @@ export interface INode extends Array<INodeTupleValue> {
 export type ICommonAttrs = {
     [ s: string ]: any
 } | null
+
+export type IVNode = any
+
+export type IVText = any
+
+export type ITemplateRenderOptions = {
+    VNodeClass?: any // vnode class
+    VTextClass?: any // vtext class
+}
+
+export type ITemplateOptions = {
+    escape?: boolean
+} & ITemplateRenderOptions
