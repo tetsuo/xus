@@ -1,17 +1,9 @@
 import through = require("through2")
 import {Parser} from "htmlparser2"
 import {IToken, ITokenKind, ICommonAttrs} from "./types"
+import {stacheMatcher, stacheSplitter, KindByTagSymbol} from "./util"
 const pumpify = require("pumpify")
 const duplexify = require("duplexify")
-
-export const stacheSplitter = /({[^}]+})/
-export const stacheMatcher = /^{\s*([#\/]?)(\w+)\s*}$/
-
-export const KindByTagSymbol = {
-  "" : ITokenKind.Variable,
-  "#": ITokenKind.SectionOpen,
-  "/": ITokenKind.SectionClose
-}
 
 /**
  * Scan a string for stache tags and emit tokens.
@@ -59,7 +51,7 @@ export function scan(s: string, cb: (er: Error|null, kind?: ITokenKind, body?: s
  *
  * Returns a transform stream that takes stache input and produces rows of output.
  *
- * The output rows are of the form: [ type, tag|text[, attrs] ]
+ * The output rows are of the form: `[ type, tag|text[, attrs] ]`
  */
 export function stache(): NodeJS.ReadWriteStream {
   const tr = through.obj(function(token: IToken, enc, next) {
@@ -88,7 +80,7 @@ export function stache(): NodeJS.ReadWriteStream {
  * Returns a transform stream that takes html input and produces rows of output
  * using forgiving 'htmlparser2'.
  *
- * The output rows are of the form: [ type, tag|text[, attrs] ]
+ * The output rows are of the form: `[ type, tag|text[, attrs] ]`
  */
 export function html(): NodeJS.ReadWriteStream {
   const parser = new Parser({

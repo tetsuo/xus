@@ -1,13 +1,13 @@
 {
-  "name": "ddf",
+  "name": "xup",
   "version": "0.1.0",
-  "description": "ddf",
+  "description": "xup",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tetsuo/ddf.git"
+    "url": "https://github.com/tetsuo/xup.git"
   },
   "bin": {
-    "ddf": "cmd.js"
+    "xup": "cmd.js"
   },
   "main": "lib/index.js",
   "typings": "lib/index",

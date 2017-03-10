@@ -12,13 +12,29 @@ import {
 } from "./types"
 import through = require("through2")
 
-enum State { InText = 0, InTag }
-
+/**
+ * Turns a parse tree into a pre-compiled function that can be evaluated for rendering
+ * and have the following structure:
+ *
+ *   function render (state, options, constructor)
+ *
+ * You can pass a `constructor` to create an execution context at runtime, or
+ * use `render.call()` to bind an existing one.
+ *
+ * @param tree  A parse tree.
+ */
 export function toFunction(tree: INodeTupleValue[]) {
     return (new Function("d", "m", "t", "t=t?new t:this;t.s(" + JSON.stringify(tree) + ");return t.r(d,m)"))
 }
 
+/**
+ * Compile a stream of stache tokens to parse trees.
+ *
+ * Returns a duplex stream that takes rows of `IToken` and produces rows of `INode` and/or `ITextNode`'s.
+ */
 export function buildTree(): NodeJS.ReadWriteStream {
+    enum State { InText = 0, InTag }
+
     let state: State   = State.InText,
         cursor: INode  = null,
         top: (INode | ITextNode)[][] = []
