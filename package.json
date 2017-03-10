@@ -15,14 +15,15 @@
     "test-diff": "tape lib/**/test/*.js | tap-diff",
     "test": "tape lib/**/test/*.js",
     "test-watch": "npm run watch & tape-watch lib/**/test/*.js -p tap-diff",
-    "clean": "rm -fr lib && rm -f public/bundle.js",
+    "clean": "rm -fr lib",
     "build": "npm run clean && tsc",
     "watch": "npm run clean && tsc --watch"
   },
   "license": "MIT",
   "dependencies": {
+    "duplexify": "^3.5.0",
     "htmlparser2": "^3.9.2",
-    "stream-combiner2": "^1.1.1",
+    "pumpify": "^1.3.5",
     "through2": "^2.0.3"
   },
   "devDependencies": {

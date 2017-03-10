@@ -1,63 +1,25 @@
 import through = require("through2")
 import {Parser} from "htmlparser2"
-import stream = require("stream")
-import {IToken, ITokenKind} from "./types"
-const combine = require("stream-combiner2")
+import {IToken, ITokenKind, ICommonAttrs} from "./types"
+const pumpify = require("pumpify")
+const duplexify = require("duplexify")
 
-/*
-export function stache() {
-  const tr = through.obj(function(row, enc, next) {
-    if (row[])
-
-  })
-  const tr = through.obj(function (row, enc, next) {
-    if (row[0] === "text") {
-      scan(row[1], function (type, value) {
-        tr.push([type, value]);
-      });
-    } else this.push(row);
-    next();
-  });
-  return combine(tokenize(), tr);
-};
-
-var tags = {
-  "": "variable",
-  "#": "section:open",
-  "/": "section:close" 
-};
-
-function scan (s, cb) {
-  var i = -1, text = "", match, token,
-      tokens = s.split(/({[^}]+})/);
-  while (++ i < tokens.length) {
-    token = tokens[i];
-    if (0 !== i % 2) {
-      free();
-      match = token.match(/^{\s*([#\/]?)(\w+)\s*}$/);
-      if (!match) throw new Error("scan error: " + token);
-      cb(tags[match[1]], match[2]);
-    } else text += token;
-  }
-  function free () {
-    if (text.length) {
-      cb("text", text);
-      text = "";
-    }
-  }
-  free();
-}
-*/
+export const stacheSplitter = /({[^}]+})/
+export const stacheMatcher = /^{\s*([#\/]?)(\w+)\s*}$/
 
 export const KindByTagSymbol = {
   "" : ITokenKind.Variable,
   "#": ITokenKind.SectionOpen,
   "/": ITokenKind.SectionClose
 }
-export const stacheSplitter = /({[^}]+})/
-export const stacheMatcher = /^{\s*([#\/]?)(\w+)\s*}$/
 
-export function scan(s: string, cb: (er: Error|null, kind?: ITokenKind, body?: string) => void) {
+/**
+ * Scan a string for stache tags and emit tokens.
+ *
+ * @param s   Text to be scanned.
+ * @param cb  Callback will be called for each seen tag.
+ */
+export function scan(s: string, cb: (er: Error|null, kind?: ITokenKind, body?: string) => void): void {
   let i = -1,
       text = "",
       match: RegExpMatchArray,
@@ -92,7 +54,14 @@ export function scan(s: string, cb: (er: Error|null, kind?: ITokenKind, body?: s
   free()
 }
 
-export function stache(): stream.Transform {
+/**
+ * Transform stream to tokenize mustache.
+ *
+ * Returns a transform stream that takes stache input and produces rows of output.
+ *
+ * The output rows are of the form: [ type, tag|text[, attrs] ]
+ */
+export function stache(): NodeJS.ReadWriteStream {
   const tr = through.obj(function(token: IToken, enc, next) {
     const [ kind, value ] = token
 
@@ -110,10 +79,18 @@ export function stache(): stream.Transform {
     next()
   })
 
-  return combine.obj(html(), tr)
+  return pumpify.obj(html(), tr)
 }
 
-export function html(): stream.Transform {
+/**
+ * Streaming HTML tokenizer.
+ *
+ * Returns a transform stream that takes html input and produces rows of output
+ * using forgiving 'htmlparser2'.
+ *
+ * The output rows are of the form: [ type, tag|text[, attrs] ]
+ */
+export function html(): NodeJS.ReadWriteStream {
   const parser = new Parser({
     onopentag: function(name, attrs) {
       push(ITokenKind.Open, name, attrs)
@@ -126,13 +103,15 @@ export function html(): stream.Transform {
     }
   })
 
-  const tr = through.obj((row, enc, next) => {
-    parser.write(row)
-  })
+  const tr = through.obj()
 
-  function push(kind: ITokenKind, value: string, attrs = null) {
-    tr.push([ kind, value, attrs ])
+  function push(kind: ITokenKind, value: string, attrs?: ICommonAttrs) {
+    const token: IToken = [ kind, value ]
+    if (attrs) {
+      token.push(attrs)
+    }
+    tr.push(token)
   }
 
-  return tr
+  return duplexify.obj(parser, tr)
 }
