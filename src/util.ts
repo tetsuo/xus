@@ -8,3 +8,6 @@ export const KindByTagSymbol = {
   "#": ITokenKind.SectionOpen,
   "/": ITokenKind.SectionClose
 }
+
+export const classIdSplit = /([\.#]?[a-zA-Z0-9\u007F-\uFFFF_:-]+)/
+export const notClassId = /^\.|#/
