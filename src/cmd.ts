@@ -18,7 +18,7 @@ if ((!file && !argv.version) || argv.help) {
     console.log("v" + require("../package.json").version)
     process.exit(0)
 } else {
-    console.log(file)
+	throw new Error("not implemented")
 }
 
 function showUsage() {
