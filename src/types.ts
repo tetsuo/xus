@@ -77,9 +77,11 @@ export type ITemplateRenderOptions = {
     VTextClass?: IVTextClass
 }
 
-export type ITemplateOptions = {
+export type IBaseTemplateOptions = {
     escape?: boolean
-} & ITemplateRenderOptions
+}
+
+export type ITemplateOptions = IBaseTemplateOptions & ITemplateRenderOptions
 
 export interface IAbstractTemplate<T extends INode> {
     root: T
