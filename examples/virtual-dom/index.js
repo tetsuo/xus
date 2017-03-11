@@ -1,12 +1,12 @@
 const runtime = require("../../lib/runtime")
 const Template = runtime.Template
-var VNode = require("virtual-dom/vnode/vnode")
-var VText = require("virtual-dom/vnode/vtext")
-var createElement = require("virtual-dom/create-element")
+const VNode = require("virtual-dom/vnode/vnode")
+const VText = require("virtual-dom/vnode/vtext")
+const createElement = require("virtual-dom/create-element")
 
-var render = require("./layout.html")
+const render = require("./layout.html")
 
-var virtualTree = render({
+const virtualTree = render({
   title: "Fruits",
   fruits: [
     { name: "Kiwi" },
@@ -14,5 +14,5 @@ var virtualTree = render({
   ]
 }, { VNodeClass: VNode, VTextClass: VText }, Template)
 
-var rootNode = createElement(virtualTree)
+const rootNode = createElement(virtualTree)
 document.body.appendChild(rootNode)
