@@ -1,8 +1,7 @@
 import test = require("tape")
 import tokenize = require("../tokenize")
 import fs = require("fs")
-
-const fixturesDir = __dirname + "/../../fixtures"
+import {fixturesDir} from "./util"
 
 test("tokenize", t => {
     let len = 0

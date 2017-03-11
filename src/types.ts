@@ -80,3 +80,9 @@ export type ITemplateRenderOptions = {
 export type ITemplateOptions = {
     escape?: boolean
 } & ITemplateRenderOptions
+
+export interface IAbstractTemplate<T extends INode> {
+    root: T
+    options: any
+    render<P extends IVNode, U extends IVText>(state: any, options: any): (P | U)[]
+}

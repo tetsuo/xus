@@ -2,8 +2,7 @@ import test = require("tape")
 import compile = require("../compile")
 import tokenize = require("../tokenize")
 import fs = require("fs")
-
-const fixturesDir = __dirname + "/../../fixtures"
+import {fixturesDir} from "./util"
 
 test("build tree", t => {
     [

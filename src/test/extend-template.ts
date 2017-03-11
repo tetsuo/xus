@@ -3,15 +3,13 @@ import {Template} from "../runtime"
 import tokenize = require("../tokenize")
 import compile = require("../compile")
 import {inherits} from "util"
+import {AbstractVNodeClass, AbstractVTextClass} from "./util"
 
 inherits(SubTemplate, Template)
 
 function SubTemplate () { /* */ }
 
 SubTemplate.prototype.escape = function (s) { return "qux" }
-
-class AbstractVTextClass { constructor(public text) {} }
-class AbstractVNodeClass { constructor(public tag, public props, public children) {} }
 
 test("extend template", function (t) {
     const s = compile.buildTree()

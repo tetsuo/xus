@@ -3,11 +3,7 @@ import {Template} from "../runtime"
 import tokenize = require("../tokenize")
 import compile = require("../compile")
 import fs = require("fs")
-
-const fixturesDir = __dirname + "/../../fixtures"
-
-class AbstractVTextClass { constructor(public text) {} }
-class AbstractVNodeClass { constructor(public tag, public props, public children) {} }
+import {AbstractVNodeClass, AbstractVTextClass, fixturesDir} from "./util"
 
 test("render abstract", t => {
     let len = 0

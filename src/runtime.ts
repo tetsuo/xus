@@ -11,13 +11,14 @@ import {
     ITemplateOptions,
     IVNode,
     IVNodeAttributes,
-    IVText
+    IVText,
+    IAbstractTemplate
 } from "./types"
 
 /**
  * Renders a parse tree into a virtual tree.
  */
-export class Template {
+export class Template implements IAbstractTemplate<INode> {
     root: INode
 
     options: ITemplateOptions

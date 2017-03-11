@@ -2,9 +2,7 @@ import test = require("tape")
 import {Template} from "../runtime"
 import tokenize = require("../tokenize")
 import compile = require("../compile")
-
-class AbstractVTextClass { constructor(public text) {} }
-class AbstractVNodeClass { constructor(public tag, public props, public children) {} }
+import {AbstractVNodeClass, AbstractVTextClass} from "./util"
 
 test("escape", function (t) {
     const s = compile.buildTree()
