@@ -1,4 +1,4 @@
-const browserifyTransform = require("../browserify-transform")
+import transform = require("../transform")
 import browserify = require("browserify")
 import test = require("tape")
 import vm = require("vm")
@@ -7,7 +7,7 @@ import {fixturesDir} from "./util"
 test("browserify transform", t => {
     const expected = require(fixturesDir + "/fruits/expected.json")
     browserify(fixturesDir + "/fruits/index.js")
-        .transform(browserifyTransform)
+        .transform(transform.browserify)
         .bundle((er, src) => {
             if (er) {
                 throw er

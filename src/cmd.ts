@@ -23,12 +23,12 @@ if ((!file && !argv.version) || argv.help) {
 
 function showUsage() {
     const usage =
-        `xup file {options}
+        `xup FILE {OPTIONS}
 
 Options:
 
-  -v, --version  Show version number.
-  -h, --help     Show this message.
+  -v, --version  show version number
+  -h, --help     show this message
 `
     console.log(usage)
     process.exit(0)
