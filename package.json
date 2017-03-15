@@ -6,9 +6,6 @@
     "type": "git",
     "url": "https://github.com/tetsuo/xup.git"
   },
-  "bin": {
-    "xup": "cmd.js"
-  },
   "main": "lib/index.js",
   "typings": "lib/index",
   "scripts": {
