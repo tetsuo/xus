@@ -89,7 +89,7 @@ export class Template implements IAbstractTemplate<INode> {
                 top.pop()
             } else if (node[INodeIndex.Kind] === IStacheNodeKind.Variable) {
                 tail = top[top.length - 1]
-                acc.push(new VTextClass(this.escape(tail[node[INodeIndex.Reference] as IStacheNodeReference])))
+                acc.push(new VTextClass(tail, node[INodeIndex.Reference]))
             }
 
             return acc

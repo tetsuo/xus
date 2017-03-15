@@ -66,15 +66,15 @@ export interface IVNodeClass {
     new(type: string, attrs: ICommonAttrs, children?: (IVNode | IVText)[] | void): IVNode
 }
 
-export interface IVTextClass {
-    new(text: string): IVText
-}
+// export interface IVTextClass {
+//     new(text: string): IVText
+// }
 
 export type IVNodeAttributes = { attributes: ICommonAttrs } | {}
 
 export type ITemplateRenderOptions = {
     VNodeClass?: IVNodeClass
-    VTextClass?: IVTextClass
+    VTextClass?: any
 }
 
 export type IBaseTemplateOptions = {
