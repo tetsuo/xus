@@ -12,7 +12,6 @@
     "docs": "./node_modules/.bin/typedoc --includeDeclarations --name 'xūp' --out docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme ext/typedoc-theme --exclude '**/test/**' --jsx react --readme docs/api-main.md src",
     "test-diff": "tape lib/**/test/*.js | tap-diff",
     "test": "npm run build && tape lib/**/test/*.js",
-    "test-watch": "npm run watch & tape-watch lib/**/test/*.js -p tap-diff",
     "clean": "rm -fr lib",
     "build": "npm run clean && tsc",
     "watch": "npm run clean && tsc --watch"
@@ -48,7 +47,6 @@
     "react-dom": "^15.4.2",
     "tap-diff": "^0.1.1",
     "tape": "^4.6.3",
-    "tape-watch": "^2.2.4",
     "typescript": "^2.2.1"
   }
 }
