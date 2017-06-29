@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "eg2.tslint",
+        "fknop.vscode-npm",
+        "christian-kohler.npm-intellisense",
+        "yukidoi.blade-runner"
+    ]
+}

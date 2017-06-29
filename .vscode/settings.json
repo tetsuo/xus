@@ -1,0 +1,32 @@
+{
+    "typescript.tsdk": "./node_modules/typescript/lib",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "explorer.openEditors.visible": 0,
+    "files.trimTrailingWhitespace": true,
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "files.exclude": {
+        ".vscode/chrome/**": true,
+        "lib/**": true,
+        "node_modules/**": true
+    },
+    "files.watcherExclude": {
+        ".vscode/chrome/**": true,
+        "node_modules/**": true,
+        "lib/**": true
+    },
+    "search.exclude": {
+        ".vscode/chrome/**": true,
+        "node_modules/**": true,
+        "lib/**": true
+    },
+    "html.format.extraLiners": "!",
+    "html.format.indentInnerHtml": true,
+    "tslint.enable": true,
+    "tslint.rulesDirectory": [
+        "node_modules/tslint-eslint-rules/dist/rules",
+        "node_modules/tslint-react/rules"
+    ],
+    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true
+}
