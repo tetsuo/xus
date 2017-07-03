@@ -1,8 +1,4 @@
-# xūs
-
-logic-_less_ applications.
-
-# get started
+### Install
 
 With `npm` (or `yarn`), do:
 
@@ -12,7 +8,7 @@ npm install xus
 
 See [xusify](https://github.com/tetsuo/xusify) for the browserify transform.
 
-# example
+### Example
 
 ```typescript
 import xus = require("xus")

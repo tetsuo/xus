@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <div id="main"></div>
+
+    <ul>
+        {#fruits}
+            <li>{name}</li>
+        {/fruits}
+    </ul>
+
+    <script src="xus.js"></script>
+    <script>
+        var el = document.getElementsByTagName("ul")[0]
+        var state = xus.observable({
+            fruits: [ {name:1}, {name:2} ]
+        })
+
+        xus(el.outerHTML, state, {}, function(er, el) {
+            if (er) {
+                throw er
+            }
+            xus.render(el, document.getElementById("main"))
+            state.fruits.push({ name: "bla" })
+        })
+    </script>
+</body>
+</html>

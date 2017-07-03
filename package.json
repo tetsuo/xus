@@ -10,7 +10,7 @@
   "main": "index.js",
   "typings": "lib/index",
   "scripts": {
-    "docs": "typedoc --includeDeclarations --name 'xūs' --out dist/docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme ext/typedoc-theme --exclude '**/test/**' --jsx react --readme dist/docs/api-main.md src",
+    "docs": "typedoc --includeDeclarations --name 'xūs' --out dist/docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme ext/typedoc-theme --exclude '**/test/**' --jsx react --readme ext/api-main.md src",
     "test-diff": "tape lib/**/test/*.js | tap-diff",
     "test": "tape lib/**/test/*.js",
     "clean": "rm -fr lib",
