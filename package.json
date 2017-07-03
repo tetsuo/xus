@@ -1,24 +1,24 @@
 {
   "name": "xus",
-  "version": "0.1.1",
+  "version": "0.0.2",
   "description": "logic-less applications",
   "repository": {
     "type": "git",
     "url": "https://github.com/tetsuo/xus.git"
   },
-  "author": "Onur Gunduz <ogunduz@gmail.com> (http://onurgunduz.com)",
   "main": "index.js",
+  "umd:main": "dist/xus.js",
   "typings": "lib/index",
   "scripts": {
-    "docs": "typedoc --includeDeclarations --name 'xūs' --out dist/docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme ext/typedoc-theme --exclude '**/test/**' --jsx react --readme ext/api-main.md src",
+    "docs": "typedoc --includeDeclarations --name 'xūs' --out docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme ext/typedoc-theme --exclude '**/test/**' --jsx react --readme ext/api-main.md src",
     "test-diff": "tape lib/**/test/*.js | tap-diff",
     "test": "tape lib/**/test/*.js",
     "clean": "rm -fr lib",
     "build": "npm run clean && tsc",
     "watch": "npm run clean && tsc --watch",
-    "umd": "npm run build && NODE_ENV=production browserify index.js -s xus | uglifyjs -c > dist/xus.js",
-    "dist": "npm run umd && npm run docs"
+    "dist": "npm run build && NODE_ENV=production browserify index.js -s xus | uglifyjs -c > dist/xus.js"
   },
+  "author": "Onur Gunduz <ogunduz@gmail.com> (https://onurgunduz.com)",
   "license": "MIT",
   "dependencies": {
     "duplexify": "^3.5.0",
@@ -51,5 +51,9 @@
     "typedoc": "^0.7.1",
     "typescript": "^2.3.4",
     "uglify-js": "^3.0.23"
-  }
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ]
 }

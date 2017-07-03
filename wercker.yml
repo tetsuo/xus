@@ -18,17 +18,17 @@ build:
         code: |
             npm run test
 
-dist-build:
+build-docs:
   steps:
     - script:
-        name: dist
+        name: docs
         code: |
-            npm run dist
+            npm run docs
 
-deploy:
+deploy-docs:
   steps:
     - install-packages:
         packages: git ssh-client
     - lukevivier/gh-pages@0.2.1:
         token: $GIT_TOKEN
-        basedir: dist
+        basedir: docs
