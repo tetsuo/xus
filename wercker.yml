@@ -1,0 +1,34 @@
+box:
+    id: tetsuo/electron-ready:4
+
+build:
+  steps:
+    - script:
+        name: install dependencies
+        code: |
+            export YARN_CACHE=$WERCKER_CACHE_DIR/yarn
+            export NODE_ENV=development
+            HOME=$YARN_CACHE yarn
+    - script:
+        name: build
+        code: |
+            npm run build
+    - script:
+        name: test
+        code: |
+            npm run test
+
+dist-build:
+  steps:
+    - script:
+        name: dist
+        code: |
+            npm run dist
+
+deploy:
+  steps:
+    - install-packages:
+        packages: git ssh-client
+    - lukevivier/gh-pages@0.2.1:
+        token: $GIT_TOKEN
+        basedir: dist
