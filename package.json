@@ -7,6 +7,7 @@
     "url": "https://github.com/tetsuo/xus.git"
   },
   "main": "index.js",
+  "umd:main": "dist/xus.js",
   "typings": "lib/index",
   "scripts": {
     "docs": "typedoc --includeDeclarations --name 'xūs' --out docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme ext/typedoc-theme --exclude '**/test/**' --jsx react --readme ext/api-main.md src",
