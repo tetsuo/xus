@@ -16,8 +16,7 @@
     "clean": "rm -fr lib",
     "build": "npm run clean && tsc",
     "watch": "npm run clean && tsc --watch",
-    "umd": "npm run build && NODE_ENV=production browserify index.js -s xus | uglifyjs -c > dist/xus.js",
-    "dist": "npm run umd && npm run docs"
+    "dist": "npm run build && NODE_ENV=production browserify index.js -s xus | uglifyjs -c > dist/xus.js"
   },
   "author": "Onur Gunduz <ogunduz@gmail.com> (https://onurgunduz.com)",
   "license": "MIT",
