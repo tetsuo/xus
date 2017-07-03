@@ -19,3 +19,5 @@ import xus = require("xus")
 ```
 
 Documentation is on the way :)
+
+UMD packages are here: https://unpkg.com/xus/dist/
