@@ -18,3 +18,4 @@ See [xusify](https://github.com/tetsuo/xusify) for the browserify transform.
 import xus = require("xus")
 ```
 
+Documentation is on the way :)
