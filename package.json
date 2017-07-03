@@ -10,13 +10,14 @@
   "main": "index.js",
   "typings": "lib/index",
   "scripts": {
-    "docs": "typedoc --includeDeclarations --name 'xūs' --out docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme ext/typedoc-theme --exclude '**/test/**' --jsx react --readme docs/api-main.md src",
+    "docs": "typedoc --includeDeclarations --name 'xūs' --out dist/docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme ext/typedoc-theme --exclude '**/test/**' --jsx react --readme dist/docs/api-main.md src",
     "test-diff": "tape lib/**/test/*.js | tap-diff",
-    "test": "npm run build && tape lib/**/test/*.js",
+    "test": "tape lib/**/test/*.js",
     "clean": "rm -fr lib",
     "build": "npm run clean && tsc",
     "watch": "npm run clean && tsc --watch",
-    "dist": "npm run build && NODE_ENV=production browserify index.js -s xus | uglifyjs -c > dist/xus.js"
+    "umd": "npm run build && NODE_ENV=production browserify index.js -s xus | uglifyjs -c > dist/xus.js",
+    "dist": "npm run umd && npm run docs"
   },
   "license": "MIT",
   "dependencies": {
