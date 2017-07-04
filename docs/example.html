@@ -1,5 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>xūs Example</title>
+    <style>
+        .fruits {
+            background-color: aquamarine;
+        }
+    </style>
+</head>
 <body>
     <h1>Fruits</h1>
 
@@ -10,8 +21,8 @@
 
     <div id="list">
         <div>
-            <p>You have {count} fruits:</p>
-            <ul>
+            <p>You have <b>{count}</b> fruits:</p>
+            <ul class="fruits">
                 {#fruits}
                     <li>{name}</li>
                 {/fruits}
@@ -23,7 +34,8 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.min.js"></script>
     <script src="//unpkg.com/mobx@3.1.16/lib/mobx.umd.js"></script>
     <script src="//unpkg.com/mobx-react@4.2.2"></script>
-    <script src="//unpkg.com/xus@0.0.3/dist/xus.js"></script>
+    <script src="//unpkg.com/xus/dist/xus.js"></script>
+    <!--<script src="../dist/xus.js"></script>-->
 
     <script>
         // create a new state object using mobx (see: https://github.com/mobxjs/mobx)
