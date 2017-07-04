@@ -349,3 +349,12 @@ test("render conditional scope 2", t => {
         t.end()
     })
 })
+
+test("convert to jsx attrs", t => {
+    build("<div class=xw><input class=de type=radio /><textarea value=555 /><input type=text value=333 /></div>", {}, options, (buildError, el: React.ReactElement<any>, html) => {
+        t.error(buildError, html)
+        const w = shallow(el)
+        t.equal(w.html(), '<div class="xw"><input class="de"/><textarea>555</textarea><input value="333"/></div>')
+        t.end()
+    })
+})
