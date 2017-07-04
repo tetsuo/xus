@@ -1,20 +1,18 @@
 import { shallow } from "enzyme"
-import { observable } from "mobx"
 import test = require("tape")
-import { xus as build } from "../index"
+import * as mobx from "mobx"
+import * as mobxReact from "mobx-react"
+import * as React from "react"
+import * as ReactDOM from "react-dom"
+import { xus as build } from "../"
 
-// import { ReactTemplate } from "../react"
-// import { toRenderFunction } from "../transform"
-// import util = require("./util")
+const { observable } = mobx
 
-// function build(html: string, state: any, options: any, cb: (buildError, node?, html?: string) => void) {
-//     toRenderFunction(html, (transformError, render?) => {
-//         if (transformError) {
-//             return cb(transformError)
-//         }
-//         cb(null, render.call(new ReactTemplate, state, options), html)
-//     })
-// }
+const options = {
+    React: React,
+    mobxReact: mobxReact,
+    mobx: mobx
+}
 
 test("render text and vars", t => {
     const state = observable({
@@ -22,7 +20,7 @@ test("render text and vars", t => {
         bar: 123
     })
 
-    build("<x>sdf{baz}k{bar}</x>", state, {}, (buildError, el, html) => {
+    build("<x>sdf{baz}k{bar}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
@@ -42,7 +40,7 @@ test("render single var", t => {
         baz: 456
     })
 
-    build("<x>{baz}</x>", state, {}, (buildError, el, html) => {
+    build("<x>{baz}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
@@ -60,7 +58,7 @@ test("render conditional block", t => {
         show: true
     })
 
-    build("<x>{#show}sdf{/show}</x>", state, {}, (buildError, el, html) => {
+    build("<x>{#show}sdf{/show}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
@@ -82,7 +80,7 @@ test("render object", t => {
         baz: { name: "Kiwi" }
     })
 
-    build("<x>{#bar}{name}k{z}{/bar}kd{#baz}{name}{/baz}</x>", state, {}, (buildError, el, html) => {
+    build("<x>{#bar}{name}k{z}{/bar}kd{#baz}{name}{/baz}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
@@ -106,7 +104,7 @@ test("render array 1", t => {
         ]
     })
 
-    build("<x>{#fruits}<y>{name}</y>{/fruits}</x>", state, {}, (buildError, el, html) => {
+    build("<x>{#fruits}<y>{name}</y>{/fruits}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
@@ -130,7 +128,7 @@ test("render array", t => {
         ]
     })
 
-    build("<x>{#fruits}<y>{name}</y>{/fruits}</x>", state, {}, (buildError, el, html) => {
+    build("<x>{#fruits}<y>{name}</y>{/fruits}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
@@ -154,7 +152,7 @@ test("render collection", t => {
         ]
     })
 
-    build("<x>{#first}{n}{/first}</x>", state, {}, (buildError, el, html) => {
+    build("<x>{#first}{n}{/first}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
@@ -193,7 +191,7 @@ test("render vars scope", t => {
         }
     })
 
-    build("<x>{#a}{n}{#b}{n}{/b}{/a}{#n}{n}{/n}</x>", state, {}, (buildError, el, html) => {
+    build("<x>{#a}{n}{#b}{n}{/b}{/a}{#n}{n}{/n}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
@@ -238,7 +236,7 @@ test("render arrays scope", t => {
         ]
     })
 
-    build("<x>{#a}{#n}{n}{/n}{#m}{n}{/m}{/a}</x>", state, {}, (buildError, el, html) => {
+    build("<x>{#a}{#n}{n}{/n}{#m}{n}{/m}{/a}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
@@ -281,7 +279,7 @@ test("render conditional scope 1", t => {
         n: false
     })
 
-    build("<x>{#n}{#a}{n}{#c}t{#k}{z}{/k}{#m}{n}{/m}{/c}{#k}{z}y{/k}{/a}{/n}</x>", state, {}, (buildError, el, html) => {
+    build("<x>{#n}{#a}{n}{#c}t{#k}{z}{/k}{#m}{n}{/m}{/c}{#k}{z}y{/k}{/a}{/n}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
@@ -324,7 +322,7 @@ test("render conditional scope 2", t => {
         y: false
     })
 
-    build("<x>{#c}<k>{#y}{#bar}<i>{#f}{d}m{/f}</i>{#c}{baz}{/c}{/bar}{/y}</k>{/c}</x>", state, {}, (buildError, el, html) => {
+    build("<x>{#c}<k>{#y}{#bar}<i>{#f}{d}m{/f}</i>{#c}{baz}{/c}{/bar}{/y}</k>{/c}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
 
