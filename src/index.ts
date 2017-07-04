@@ -1,6 +1,11 @@
 import { ParseTree, ParseTreeIndex, Template, TemplateOptions, VirtualTreeProps } from "./runtime"
 import { toRenderFunction } from "./transform"
 
+export * from "./compiler"
+export * from "./lexer"
+export * from "./runtime"
+export * from "./transform"
+
 export type XusOptions<T> = {
     React: any
     mobxReact: any
