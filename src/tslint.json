@@ -1,16 +1,9 @@
 {
-  /*
-   * WARNING: When editing this file, also change all other TSLint files in this repo.
-   * Discuss your changes first, since it will impact multiple teams and possibly multiple codebases.
-   */
   "extends": [
     "tslint-eslint-rules",
     "tslint-react"
   ],
   "rules": {
-    /*
-     * Built-in rules
-     */
     "adjacent-overload-signatures": true,
     "align": [
       true,
@@ -191,9 +184,7 @@
       "check-separator",
       "check-type"
     ],
-    /*
-     * Rules provided by tslint-eslint-rules
-     */
+    /* tslint-eslint */
     "array-bracket-spacing": [
       false,
       "never"
@@ -221,9 +212,7 @@
       true,
       "always"
     ],
-    /*
-     * Override rules provided by tslint-react
-     */
+    /* tslint-react */
     "jsx-no-multiline-js": false,
     "jsx-no-lambda": true,
     "jsx-curly-spacing": [

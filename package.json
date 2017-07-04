@@ -1,6 +1,6 @@
 {
   "name": "xus",
-  "version": "0.0.4",
+  "version": "0.5.0",
   "description": "logic-less applications",
   "repository": {
     "type": "git",
@@ -10,13 +10,14 @@
   "umd:main": "dist/xus.js",
   "typings": "lib/index",
   "scripts": {
-    "docs": "typedoc --includeDeclarations --name 'xūs' --out docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme node_modules/typedoc-theme --exclude '**/test/**' --jsx react src",
-    "test-diff": "tape lib/**/test/*.js | tap-diff",
-    "test": "tape lib/**/test/*.js",
-    "clean": "rm -fr lib dist",
     "build": "npm run clean && tsc",
-    "watch": "npm run clean && tsc --watch",
-    "dist": "npm run build && mkdir -p dist && NODE_ENV=production browserify index.js -s xus | uglifyjs -c > dist/xus.js"
+    "clean": "rm -fr lib dist",
+    "dist": "npm run build && mkdir -p dist && NODE_ENV=production browserify index.js -s xus | uglifyjs -c > dist/xus.js",
+    "docs": "rm -fr examples/api && typedoc --includeDeclarations --name 'xūs API' --gaID 'UA-1238030-11' --gaSite 'tetsuo/xus' --out examples/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme /Users/onur/dev/typedoc-theme --exclude '**/test/**' --jsx react src",
+    "prepublish": "npm run test && npm run dist",
+    "test": "tape lib/**/test/*.js",
+    "test-diff": "tape lib/**/test/*.js | tap-diff",
+    "watch": "npm run clean && tsc --watch"
   },
   "author": "Onur Gunduz <ogunduz@gmail.com> (https://onurgunduz.com)",
   "license": "MIT",
@@ -49,7 +50,7 @@
     "tslint-eslint-rules": "^4.1.1",
     "tslint-react": "^3.0.0",
     "typedoc": "^0.7.1",
-    "typedoc-theme": "^0.1.0",
+    "typedoc-theme": "^0.1.2",
     "typescript": "^2.3.4",
     "uglify-js": "^3.0.23"
   },

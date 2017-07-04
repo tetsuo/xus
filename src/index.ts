@@ -1,165 +1,94 @@
-import { ParseTree, ParseTreeIndex, Template, TemplateOptions, VirtualTreeProps } from "./runtime"
-import { toRenderFunction } from "./transform"
+import { tokenize } from "./lexer"
+import { parse } from "./parser"
+import { render, RenderOptions, TemplateContext } from "./runtime"
+import through = require("through2")
+const pumpify = require("pumpify")
+const from = require("from2")
 
-export * from "./compiler"
+export * from "./parser"
 export * from "./lexer"
 export * from "./runtime"
-export * from "./transform"
 
-export type XusOptions<T> = {
-    React: any
-    mobxReact: any
-    mobx: any
-    registry?: { [s: string]: T },
-    createElement?: (type: string, props: VirtualTreeProps<T>, children: T[]) => T
-}
-
-export type ObserverComponentProps = {
-    state: any
-    attributes?: VirtualTreeProps<React.ReactNode>
-    parseTree: ParseTree
-    traverseFn?: (children: (React.ReactNode | string)[] | null, node: ParseTree | string, top?: any[]) => React.ReactNode[]
-}
-
-const selfClosingTags = [
-    "area",
-    "base",
-    "br",
-    "col",
-    "embed",
-    "hr",
-    "img",
-    "input",
-    "keygen",
-    "link",
-    "menuitem", // see: https://github.com/facebook/react/blob/85dcbf83/src/renderers/dom/shared/ReactDOMComponent.js#L437
-    "meta",
-    "param",
-    "source",
-    "track",
-    "wbr"
-]
-
-function createObserverComponent(options: XusOptions<any>, props: ObserverComponentProps) {
-    const { React } = options
-    const { parseTree, traverseFn, state } = props
-
-    const type = parseTree[ParseTreeIndex.Tag] as any
-
-    let children: React.ReactNode[] = null
-
-    let visitChildren = (selfClosingTags.indexOf(type) === -1)
-
-    let attrs = parseTree[ParseTreeIndex.Attrs] as { [s: string]: any } | null
-
-    if (attrs === null || typeof attrs !== "object") {
-        attrs = {}
-    }
-
-    const normalizedProps = Object.keys(attrs).reduce((acc: any, key) => {
-        key = key.toLowerCase()
-
-        let value: any = attrs[key]
-
-        if (typeof type === "string" && (type === "input" || type === "textarea")) {
-            if (attrs.hasOwnProperty("checked")) {
-                acc.defaultChecked = attrs.checked
-            }
-            if (attrs.hasOwnProperty("value")) {
-                acc.defaultValue = attrs.value
-                if (type === "textarea") {
-                    visitChildren = false
-                }
-            }
-        }
-
-        if (key === "class") {
-            acc.className = value
-        } else if (key === "for") {
-            acc.htmlFor = value
-        }
-
-        return acc
-    }, {}) as any
-
-
-    if (visitChildren) {
-        children = (parseTree[ParseTreeIndex.Children] as (ParseTree | string)[])
-            .reduce<React.ReactNode[]>((acc: (React.ReactNode | string)[], childTree: (ParseTree | string)) => {
-                return traverseFn(acc, childTree, [ state ])
-            }, [])
-    }
-
-
-
-
-
-
-
-    // if (attrs.dataset) {
-
-    // }
-
-    // if (properties.dataset) {
-    //     Object.keys(properties.dataset).forEach(function unnest(attrName) {
-    //     var dashedAttr = attrName.replace(/([a-z])([A-Z])/, function dash(match) {
-    //         return match[0] + '-' + match[1].toLowerCase();
-    //     });
-    //     properties['data-' + dashedAttr] = properties.dataset[attrName];
-    //     });
-    // }
-
-    return React.createElement(type, normalizedProps, children)
-}
-
-export function xus<T>(html: string, state: any, options: XusOptions<T>, cb: (buildError, node?: T, html?: string) => void) {
+/**
+ * Turns a xūs template into a reactive component tree using `React` and `mobx-react`.
+ *
+ * @param template  xūs template string.
+ * @param state  An observable state object created with `mobx.observable`.
+ * @param options  xūs does not ship with `React` and `mobx-react`, you provide them in this object.
+ * @param cb  Returns a `ReactElement` which then can be rendered to DOM with `ReactDOM.render`.
+ */
+export function xus(template: string, state: any, options: RenderOptions, cb: (error: Error, element?: React.ReactNode, template?: string) => void) {
     if (!options ||
         (typeof options === "object") &&
         (!options.hasOwnProperty("React") ||
-         !options.hasOwnProperty("mobxReact") ||
-         !options.hasOwnProperty("mobx"))) {
-        throw new Error("you must provide React, mobx and mobxReact")
+        !options.hasOwnProperty("mobxReact"))) {
+        throw new Error("you must provide React and mobxReact")
     }
 
-    const {
-        React,
-        mobx,
-        mobxReact
-    } = options
-
-    const registry = {
-        ObserverComponent: mobxReact.observer(createObserverComponent.bind(null, options))
-    }
-
-    toRenderFunction(html, (transformError, render?) => {
-        if (transformError) {
-            return cb(transformError)
+    return compile<React.ReactNode>(template, (er, ctx?) => {
+        if (er) {
+            return cb(er)
         }
-        const element = render.call(new Template, state, {
-            ...{
-                registry: {
-                    ...registry,
-                    ...options.registry
-                },
-                createElement: createElement
-            },
-            ...options
-        })
-        cb(null, element, html)
+        cb(null, render(ctx, state, options), template)
+    })
+}
+
+/**
+ * Given a a xūs template as input, will produce rows of pre-compiled functions that can be
+ * evaluated for rendering and have the following structure:
+ *
+ *   `function render (state, options, constructor)`
+ *
+ * You can pass a `constructor` to create an execution context at runtime, or
+ * use `render.call()` to bind an existing one.
+ *
+ * @typeparam T  Expected resulting node type, e.g. `React.ReactNode`.
+ * @param template  xūs template string.
+ * @param cb  If provided, the emitted rows are also passed to the callback function.
+ */
+export function compile<T>(template: string, cb?: (error: Error, ctx?: TemplateContext<T>) => void): NodeJS.ReadableStream {
+    const wrapper = through.obj(function(tree, enc, next) {
+        this.push((new Function("d" /* state */, "m" /* options */, "t" /* opt template inst */,
+            "t=t?new t:this;t.root=" + JSON.stringify(tree) + ";return t.render(d,m)")) as TemplateContext<T>)
+        next()
     })
 
-    function createElement(
-        type: React.ComponentClass | string,
-        props: VirtualTreeProps<React.ReactNode>,
-        children: (React.ReactNode | string)[]) {
+    const stream = pumpify.obj(util.fromString(template), tokenize(), parse(), wrapper)
 
-        return React.createElement(
-            registry.ObserverComponent,
-            {
-                parseTree: props.parseTree,
-                traverseFn: props.traverseFn,
-                state: props.state[props.state.length - 1]
-            },
-            children)
+    stream.on("data", (ctx: TemplateContext<T>) => {
+        if (typeof cb === "function") {
+            cb(null, ctx)
+        }
+    })
+
+    stream.on("error", streamError => {
+        if (typeof cb === "function") {
+            cb(streamError)
+        }
+    })
+
+    return stream
+}
+
+/**
+ * Utilities.
+ */
+export namespace util {
+    /**
+     * Create a stream from a string.
+     *
+     * @param s  Some string.
+     */
+    export function fromString (s: string): NodeJS.ReadWriteStream {
+        return from(function (size, next) {
+            if (s.length <= 0) {
+                return this.push(null)
+            }
+
+            const chunk = s.slice(0, size)
+            s = s.slice(size)
+
+            next(null, chunk)
+        })
     }
 }

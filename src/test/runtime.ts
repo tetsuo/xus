@@ -1,10 +1,9 @@
 import test = require("tape")
-import { inherits } from "util"
+import { compile } from ".."
 import { Template } from "../runtime"
-import { toRenderFunction } from "../transform"
 
 function build(html: string, state: any, options: any, cb: (buildError, node? , html?: string) => void) {
-    toRenderFunction(html, (transformError, render?) => {
+    compile(html, (transformError, render?) => {
         if (transformError) {
             return cb(transformError)
         }
@@ -132,7 +131,7 @@ test("static trees", t => {
         build(fixture.html, fixture.state, {
             createElement: (tag, props, children) => {
                 delete props.parseTree
-                delete props.traverseFn
+                delete props.visitor
                 delete props.state
                 return { tag, props, children }
             }

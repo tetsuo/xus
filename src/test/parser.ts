@@ -1,7 +1,7 @@
 import test = require("tape")
-import compiler = require("../compiler")
-import lexer = require("../lexer")
-import { fromString } from "../transform"
+import { util } from ".."
+import { tokenize } from "../lexer"
+import { parse } from "../parser"
 
 const randomFixtures = [
     {
@@ -60,9 +60,9 @@ const randomFixtures = [
 
 test("build random parse trees", t => {
     randomFixtures.forEach(fixture => {
-        fromString(fixture.html)
-            .pipe(lexer.tokenizeStache())
-            .pipe(compiler.buildTree())
+        util.fromString(fixture.html)
+            .pipe(tokenize())
+            .pipe(parse())
             .once("data", actual => {
                 t.deepEqual(actual, fixture.expected)
                 t.end()
@@ -76,8 +76,8 @@ test("emit top-level errors", t => {
 
   let i = 0
   function s() {
-    const s = compiler.buildTree()
-    const stacheStream = lexer.tokenizeStache()
+    const s = parse()
+    const stacheStream = tokenize()
     stacheStream.pipe(s)
     s.on("error", (err: Error) => {
       t.ok(err instanceof Error)

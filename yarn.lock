@@ -1780,8 +1780,8 @@ typedoc-default-themes@^0.5.0:
   resolved "https://registry.yarnpkg.com/typedoc-default-themes/-/typedoc-default-themes-0.5.0.tgz#6dc2433e78ed8bea8e887a3acde2f31785bd6227"
 
 typedoc-theme@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/typedoc-theme/-/typedoc-theme-0.1.0.tgz#b12e26a8f18210d76019f3a474fdfd98239d6724"
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/typedoc-theme/-/typedoc-theme-0.1.1.tgz#107ef59ecc988823dcafc2d7e06c857679365358"
 
 typedoc@^0.7.1:
   version "0.7.1"

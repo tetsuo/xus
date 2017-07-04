@@ -1,3 +1,30 @@
+const selfClosingTags = [
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "keygen",
+    "link",
+    "menuitem", // see: https://github.com/facebook/react/blob/85dcbf83/src/renderers/dom/shared/ReactDOMComponent.js#L437
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr"
+]
+
+/**
+ * A `TemplateContext` is a `Function` that has a local value of a [[ParseTree]].
+ *
+ * It will either instantiate a new [[Template]] or use the provided one in `ctor` parameter, and call
+ * [[Template.render]] method with this value.
+ */
+export type TemplateContext<U> = (state: any, options: BaseRenderOptions<U>, ctor?: TemplateConstructor<U>) => U[]
+
 export enum ParseTreeKind {
     Section = 2,
     Variable
@@ -10,56 +37,67 @@ export enum ParseTreeIndex {
     Parent = 3
 }
 
-export type ParseTree = {
+export interface ParseTree extends Array<any> {
     0: ParseTreeKind | string /* tag name */
-    1: ({ [s: string]: any } | null) | string /* stache node reference (section/variable names) */
+    1: ({ [s: string]: any } | null) | string /* node ref (section/variable names) */
     2?: ParseTree[] /* children */
     3?: ParseTree /* parent */
-} & any[]
+}
 
-export type VirtualTreeProps<T> = {
+export interface CreateElementOptions<U> {
     attributes?: { [s: string]: any } | null
     parseTree?: ParseTree
-    traverseFn?: (children: (T | string)[] | null, node: ParseTree | string, top?: any[]) => T[]
+    visitor?: (children: (U | string)[] | null, node: ParseTree | string, top?: any[]) => U[]
     state?: any
 }
 
-export type TemplateOptions<T> = {
-    registry: { [s: string]: T },
-    createElement: (type: string, props: VirtualTreeProps<T>, children: T[]) => T
+export interface BaseRenderOptions<U> {
+    createElement?: (type: string, options: CreateElementOptions<U>, children: U[]) => U
 }
 
-export interface TemplateInterface<T> {
+export interface RenderOptions extends BaseRenderOptions<React.ReactNode> {
+    registry?: { [s: string]: any }
+    React: any
+    mobxReact: any
+}
+
+export interface TemplateInterface<U> {
     root: ParseTree
-    options?: TemplateOptions<T>
-    render(state: any, options: TemplateOptions<T>): T
+    options?: BaseRenderOptions<U>
+    render: (state: any, options: BaseRenderOptions<U>) => U[]
 }
 
-export interface TemplateConstructor<T> {
-    new (options: TemplateOptions<T>): TemplateInterface<T>
+/**
+ * @hidden
+ */
+export interface TemplateConstructor<U> {
+    new (options: BaseRenderOptions<U>): TemplateInterface<U>
 }
 
-export enum TemplateSectionKind {
-    ConditionalSection = 1,
-    ArraySection = 2,
-    ObjectSection = 3
-}
-
-export class Template<T> implements TemplateInterface<T> {
+/**
+ * Template is the runtime interpreter for [[ParseTree]]s.
+ *
+ * It exposes a single [[Template.render]] method which, when called, will call the provided
+ * `createElement` method for the each tag it sees as it traverses the parse-tree (which is initially
+ * set in its `root` property).
+ *
+ * @typeparam U  A generic type for the returned values from `options.createElement`.
+ */
+export class Template<U> implements TemplateInterface<U> {
     root: ParseTree
 
-    options?: TemplateOptions<T>
+    options?: BaseRenderOptions<U>
 
-    constructor(options?: TemplateOptions<T>) {
+    constructor(options?: BaseRenderOptions<U>) {
         this.options = options
     }
 
-    render(state: any = {}, options: TemplateOptions<T>) {
+    render(state: any, options: BaseRenderOptions<U>): U[] {
         this.options = { ...this.options, ...options }
-        return this.traverse(null, this.root, [state])
+        return this.traverse(null, this.root, [ state ])
     }
 
-    protected traverse = (children: (T | string)[] | null, node: ParseTree | string, top?: any[]) => {
+    protected traverse: (children: (U | string)[] | null, node: ParseTree | string, top?: any[]) => U[] = (children, node, top?) => {
         const {
             createElement
         } = this.options
@@ -70,11 +108,8 @@ export class Template<T> implements TemplateInterface<T> {
             }
             children.push(node)
         } else if ("string" === typeof node[ParseTreeIndex.Tag]) {
-            // debugger
             let right: any[] = []
-            // debugger
             this._reduceTree(node, top, right)
-            // debugger
 
             let element: any
             const tag = node[ParseTreeIndex.Tag] as string
@@ -83,7 +118,7 @@ export class Template<T> implements TemplateInterface<T> {
                 ...{
                     parseTree: node,
                     state: top,
-                    traverseFn: this.traverse
+                    visitor: this.traverse
                 }
             }
 
@@ -134,19 +169,141 @@ export class Template<T> implements TemplateInterface<T> {
         return children
     }
 
-    private _reduceTree = (node: ParseTree | string, top: any[], children: (T | string)[]) => {
+    private _reduceTree = (node: ParseTree | string, top: any[], children: (U | string)[]) => {
         (node[ParseTreeIndex.Children] as ParseTree[])
             .reduce((acc, child) => {
                 return this.traverse(acc, child, top)
             }, children)
     }
 
-    private _formatAttributes(attrs: { [s: string]: any }): VirtualTreeProps<T> {
+    private _formatAttributes(attrs: { [s: string]: any }): { attributes?: { [s: string]: any }} {
         if (Object.keys(attrs).length) {
             return { attributes: attrs }
         }
         return {}
     }
+}
+
+function buildElement(options: RenderOptions, internalOptions: CreateElementOptions<React.ReactNode>): React.ReactElement<any> {
+    const { React } = options
+    const { parseTree, visitor, state } = internalOptions
+
+    let type = parseTree[ParseTreeIndex.Tag] as any
+
+    if (options.registry && options.registry.hasOwnProperty(type)) {
+        type = options.registry[type]
+    }
+
+    let children: React.ReactNode[] = null
+
+    let visitChildren = (selfClosingTags.indexOf(type) === -1)
+
+    let attrs = parseTree[ParseTreeIndex.Attrs] as { [s: string]: any } | null
+
+    if (attrs === null || typeof attrs !== "object") {
+        attrs = {}
+    }
+
+    const normalizedProps = Object.keys(attrs).reduce((acc: any, key) => {
+        key = key.toLowerCase()
+
+        let value: any = attrs[key]
+
+        if (typeof type === "string" && (type === "input" || type === "textarea")) {
+            if (attrs.hasOwnProperty("checked")) {
+                acc.defaultChecked = attrs.checked
+            }
+            if (attrs.hasOwnProperty("value")) {
+                acc.defaultValue = attrs.value
+                if (type === "textarea") {
+                    visitChildren = false
+                }
+            }
+        }
+
+        if (key === "class") {
+            acc.className = value
+        } else if (key === "for") {
+            acc.htmlFor = value
+        }
+
+        return acc
+    }, {}) as any
+
+    if (visitChildren) {
+        children = (parseTree[ParseTreeIndex.Children] as (ParseTree | string)[])
+            .reduce<React.ReactNode[]>((acc: (React.ReactNode | string)[], childTree: (ParseTree | string)) => {
+                return visitor(acc, childTree, [ state ])
+            }, [])
+    }
+
+    return React.createElement(type, normalizedProps, children)
+}
+
+/**
+ * Renders a [[TemplateContext]] into a `ReactNode`.
+ *
+ * If a tag name doesn't resolve to a `React.ComponentClass` in the provided `options.registry`, xūs will
+ * by default assume it is an ordinary HTML tag and wrap it in `mobxReact.observer`. If a `ComponentClass`
+ * is found instead, then it is up to the provider to wrap it up with `mobxReact`, or not.
+ *
+ * @param ctx  A [[TemplateContext]] created with [[compile]].
+ * @param state  An object created with `mobx.observable`.
+ * @param options
+ */
+export function render(ctx: TemplateContext<React.ReactNode>, state: any, options: RenderOptions): React.ReactNode {
+    if (!options ||
+        (typeof options === "object") &&
+        (!options.hasOwnProperty("React") ||
+        !options.hasOwnProperty("mobxReact") ||
+        !options.hasOwnProperty("mobx"))) {
+        throw new Error("you must provide React, mobx and mobxReact")
+    }
+
+    const {
+        React,
+        mobxReact
+    } = options
+
+    const registry = {
+        ObserverComponent: mobxReact.observer(buildElement.bind(null, options))
+    }
+
+    if (options.registry) {
+        Object.keys(options.registry).forEach(type => {
+            registry[type] = buildElement.bind(null, options)
+        })
+    }
+
+    const element = ctx.call(new Template, state, {
+        ...{
+            registry: registry,
+            createElement: createElement
+        },
+        ...options
+    })
+
+    function createElement(
+        type: string,
+        // tslint:disable-next-line:no-shadowed-variable
+        options: CreateElementOptions<React.ReactNode>,
+        children: (React.ReactNode | string)[]) {
+
+        const factory = registry.hasOwnProperty(type)
+            ? registry[type]
+            : registry.ObserverComponent
+
+        return React.createElement(
+            factory,
+            {
+                parseTree: options.parseTree,
+                visitor: options.visitor,
+                state: options.state[options.state.length - 1]
+            },
+            children)
+    }
+
+    return element
 }
 
 function isArray(value: any) {

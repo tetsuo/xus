@@ -6,7 +6,9 @@
 		"outDir": "lib",
 		"target": "es5",
 		"jsx": "react",
-		"experimentalDecorators": true
+		"experimentalDecorators": true,
+		"noUnusedLocals": true,
+		"noImplicitReturns": true
 	},
 	"include": [
 		"src/**/*.ts",

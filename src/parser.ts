@@ -1,32 +1,13 @@
 import through = require("through2")
 import { LexerToken, LexerTokenIndex, LexerTokenKind } from "./lexer"
-import { ParseTree, ParseTreeIndex, ParseTreeKind, TemplateConstructor, TemplateOptions } from "./runtime"
-
-export type RenderFunction<T> = (state: any, options: TemplateOptions<T>) => any
-
-/**
- * Turns a parse tree into a pre-compiled function that can be evaluated for rendering
- * and have the following structure:
- *
- *   function render (state, options, constructor)
- *
- * You can pass a `constructor` to create an execution context at runtime, or
- * use `render.call()` to bind an existing one.
- *
- * @param tree  A parse tree.
- */
-export function toFunction<T>(tree: ParseTree): RenderFunction<T> {
-    return (new Function("d", "m", "t", "t=t?new t:this;t.root=" + JSON.stringify(tree) + ";return t.render(d,m)")) as RenderFunction<T>
-}
+import { ParseTree, ParseTreeIndex, ParseTreeKind } from "./runtime"
 
 enum ParserState { InText = 0, InTag }
 
 /**
- * Compile a stream of stache tokens to parse trees.
- *
- * Returns a duplex stream that takes rows of `IToken` and produces rows of `INode` and/or `ITextNode`'s.
+ * Returns a duplex stream that takes rows of [[LexerToken]]s and produces rows of [[ParseTree]]s.
  */
-export function buildTree(): NodeJS.ReadWriteStream {
+export function parse(): NodeJS.ReadWriteStream {
     let state: ParserState = ParserState.InText
     let cursor: ParseTree = null
     let top: (ParseTree | string /* text node */)[][] = []
