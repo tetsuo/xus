@@ -10,7 +10,7 @@
   "umd:main": "dist/xus.js",
   "typings": "lib/index",
   "scripts": {
-    "docs": "typedoc --includeDeclarations --name 'xūs' --out docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme ext/typedoc-theme --exclude '**/test/**' --jsx react --readme ext/api-main.md src",
+    "docs": "typedoc --includeDeclarations --name 'xūs' --out docs/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme node_modules/typedoc-theme --exclude '**/test/**' --jsx react src",
     "test-diff": "tape lib/**/test/*.js | tap-diff",
     "test": "tape lib/**/test/*.js",
     "clean": "rm -fr lib",
@@ -49,6 +49,7 @@
     "tslint-eslint-rules": "^4.1.1",
     "tslint-react": "^3.0.0",
     "typedoc": "^0.7.1",
+    "typedoc-theme": "^0.1.0",
     "typescript": "^2.3.4",
     "uglify-js": "^3.0.23"
   },

@@ -17,15 +17,12 @@ build:
         name: test
         code: |
             npm run test
-
-build-docs:
-  steps:
     - script:
         name: docs
         code: |
             npm run docs
 
-deploy-docs:
+deploy:
   steps:
     - install-packages:
         packages: git ssh-client
