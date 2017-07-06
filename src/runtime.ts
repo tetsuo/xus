@@ -255,9 +255,8 @@ export function render(ctx: TemplateContext<React.ReactNode>, state: any, option
     if (!options ||
         (typeof options === "object") &&
         (!options.hasOwnProperty("React") ||
-        !options.hasOwnProperty("mobxReact") ||
-        !options.hasOwnProperty("mobx"))) {
-        throw new Error("you must provide React, mobx and mobxReact")
+        !options.hasOwnProperty("mobxReact"))) {
+        throw new Error("you must provide React and mobxReact")
     }
 
     const {
