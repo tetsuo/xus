@@ -14,7 +14,7 @@
     "clean": "rm -fr lib dist",
     "dist": "npm run build && mkdir -p dist && NODE_ENV=production browserify index.js -s xus | uglifyjs -c > dist/xus.js",
     "docs": "rm -fr examples/api && typedoc --includeDeclarations --name 'xūs API' --gaID 'UA-1238030-11' --gaSite 'tetsuo/xus' --out examples/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme /Users/onur/dev/typedoc-theme --exclude '**/test/**' --jsx react src",
-    "prepublish": "npm run test && npm run dist",
+    "prepublish": "npm run build && npm run test && npm run dist",
     "test": "tape lib/**/test/*.js",
     "test-diff": "tape lib/**/test/*.js | tap-diff",
     "watch": "npm run clean && tsc --watch"
