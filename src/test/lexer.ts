@@ -1,6 +1,6 @@
 import test = require("tape")
 import lexer = require("../lexer")
-import { fromString } from "../transform"
+import { util } from ".."
 
 test("tokenize html", t => {
     const html =
@@ -41,8 +41,8 @@ test("tokenize html", t => {
 
     t.plan(expected.length)
 
-    fromString(html)
-        .pipe(lexer.tokenizeStache())
+    util.fromString(html)
+        .pipe(lexer.tokenize())
         .on("data", data => {
             const x = expected.shift()
             t.deepEqual(data, x)
@@ -86,8 +86,8 @@ test("tokenize stache", t => {
 
     t.plan(expected.length)
 
-    fromString(html)
-        .pipe(lexer.tokenizeStache())
+    util.fromString(html)
+        .pipe(lexer.tokenize())
         .on("data", data => {
             const x = expected.shift()
             t.deepEqual(data, x)

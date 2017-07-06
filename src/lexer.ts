@@ -1,6 +1,5 @@
 import through = require("through2")
 import { Parser } from "htmlparser2"
-const pumpify = require("pumpify")
 const duplexify = require("duplexify")
 
 export enum LexerTokenKind {
@@ -12,11 +11,11 @@ export enum LexerTokenKind {
     SectionClose
 }
 
-export type LexerToken = {
+export interface LexerToken extends Array<any> {
   0: LexerTokenKind | string /* string could be a text node, or a section/variable reference */
   1: string /* value */
   2?: { [s: string]: any } /* attrs */
-} & any[]
+}
 
 export enum LexerTokenIndex {
   Kind = 0, TextNode = 0, VariableVariable = 0, SectionVariable = 0,
@@ -24,7 +23,7 @@ export enum LexerTokenIndex {
   Attrs = 2
 }
 
-export type LexerStacheOptions = {
+export interface LexerOptions {
   matcher?: RegExp
   splitter?: RegExp
   symbolMap?: { [s: string]: LexerTokenKind }
@@ -39,65 +38,46 @@ const defaultSymbolMap = {
 }
 
 /**
- * Transform stream to tokenize mustache.
+ * Given a a xūs template as input, will produce rows of [[LexerToken]]s.
  *
- * Returns a transform stream that takes stache input and produces rows of output.
+ *   `function render (state, options, constructor)`
  *
- * The output rows are of the form: `[ type, tag|text[, attrs] ]`
+ * @param options  Override the symbol map and the default matchers.
  */
-export function tokenizeStache(opts?: LexerStacheOptions): NodeJS.ReadWriteStream {
-  const tr = through.obj(function(token: LexerToken, enc, next) {
-    const [kind, value] = token
+export function tokenize(options?: LexerOptions): NodeJS.ReadWriteStream {
+    const tr = through.obj()
 
-    if (kind === LexerTokenKind.Text) {
-      scan(value, opts, function scan(er, scanKind, body) {
-        if (er) {
-          return void tr.emit(er.message)
+    function pushToken(kind: LexerTokenKind, value: string, attrs?: { [s: string]: any }) {
+        const token: LexerToken = [ kind, value ]
+        if (attrs) {
+            token.push(attrs)
         }
-        tr.push([scanKind, body])
-      })
-    } else {
-      this.push(token)
+
+        if (kind === LexerTokenKind.Text) {
+            scan(value, options, function scan(er, scanKind, body) {
+                if (er) {
+                    return void tr.emit(er.message)
+                }
+                tr.push([ scanKind, body ])
+            })
+        } else {
+            tr.push(token)
+        }
     }
 
-    next()
-  })
+    const parser = new Parser({
+        onopentag: function pushOpen(name, attrs) {
+            pushToken(LexerTokenKind.Open, name, attrs)
+        },
+        onclosetag: function pushClose(value) {
+            pushToken(LexerTokenKind.Close, value)
+        },
+        ontext: function pushText(value) {
+            pushToken(LexerTokenKind.Text, value)
+        }
+    })
 
-  return pumpify.obj(tokenizeHtml(), tr)
-}
-
-/**
- * Streaming HTML tokenizer.
- *
- * Returns a transform stream that takes html input and produces rows of output
- * using forgiving 'htmlparser2'.
- *
- * The output rows are of the form: `[ type, tag|text[, attrs] ]`
- */
-export function tokenizeHtml(): NodeJS.ReadWriteStream {
-  const tr = through.obj()
-
-  function pushToken(kind: LexerTokenKind, value: string, attrs?: { [s: string]: any }) {
-    const token: LexerToken = [kind, value]
-    if (attrs) {
-      token.push(attrs)
-    }
-    tr.push(token)
-  }
-
-  const parser = new Parser({
-    onopentag: function pushOpen(name, attrs) {
-      pushToken(LexerTokenKind.Open, name, attrs)
-    },
-    onclosetag: function pushClose(value) {
-      pushToken(LexerTokenKind.Close, value)
-    },
-    ontext: function pushText(value) {
-      pushToken(LexerTokenKind.Text, value)
-    }
-  })
-
-  return duplexify.obj(parser, tr)
+    return duplexify.obj(parser, tr)
 }
 
 /**
@@ -106,7 +86,7 @@ export function tokenizeHtml(): NodeJS.ReadWriteStream {
  * @param s   Text to be scanned.
  * @param cb  Callback will be called for each seen tag.
  */
-function scan(s: string, opts: LexerStacheOptions = {}, cb: (er: Error|null, kind?: LexerTokenKind, body?: string) => void): void {
+function scan(s: string, opts: LexerOptions = {}, cb: (er: Error|null, kind?: LexerTokenKind, body?: string) => void): void {
   let i = -1
   let text = ""
   let match: RegExpMatchArray

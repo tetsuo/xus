@@ -1,17 +1,13 @@
 import { shallow } from "enzyme"
 import test = require("tape")
-import * as mobx from "mobx"
+import { observable } from "mobx"
 import * as mobxReact from "mobx-react"
 import * as React from "react"
-import * as ReactDOM from "react-dom"
 import { xus as build } from "../"
-
-const { observable } = mobx
 
 const options = {
     React: React,
-    mobxReact: mobxReact,
-    mobx: mobx
+    mobxReact: mobxReact
 }
 
 test("render text and vars", t => {
@@ -355,6 +351,30 @@ test("convert to jsx attrs", t => {
         t.error(buildError, html)
         const w = shallow(el)
         t.equal(w.html(), '<div class="xw"><input class="de"/><textarea>555</textarea><input value="333"/></div>')
+        t.end()
+    })
+})
+
+test("component registry", t => {
+    const state = { n: 1 }
+
+    function foo(props) {
+        return React.createElement("c", props, React.createElement("b", {}, "bold"), props.children)
+    }
+
+    const optionsWithRegistry = {
+        ...options,
+        ...{
+            registry: {
+                foo: foo
+            }
+        }
+    }
+
+    build("<div>{n}<foo class=bla>{n}<bar>{n}6</bar>{n}25</foo></div>", state, optionsWithRegistry, (buildError, el: React.ReactElement<any>, html) => {
+        t.error(buildError, html)
+        const w = shallow(el)
+        t.equal(w.html(), '<div>1<c class="bla"><b>bold</b>1<bar>16</bar>125</c></div>')
         t.end()
     })
 })
