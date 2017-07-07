@@ -1,6 +1,6 @@
 {
   "name": "xus",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "logic-less applications",
   "repository": {
     "type": "git",
@@ -50,7 +50,7 @@
     "tslint-eslint-rules": "^4.1.1",
     "tslint-react": "^3.0.0",
     "typedoc": "^0.7.1",
-    "typedoc-theme": "^0.1.3",
+    "typedoc-theme": "^0.1.4",
     "typescript": "^2.3.4",
     "uglify-js": "^3.0.23"
   },

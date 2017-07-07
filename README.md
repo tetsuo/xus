@@ -199,7 +199,7 @@ const rootNode = createElement(tree)
 
 xūs `Template`s are mainly just straight-forward `render(state, options)` methods and they can be extended very easily.
 
-See [API Reference](https://tetsuo.github.io/xus/api/) for more information.
+See the [API Reference](https://tetsuo.github.io/xus/) for more information.
 
 ## typed
 
