@@ -13,7 +13,7 @@
     "build": "npm run clean && tsc",
     "clean": "rm -fr lib dist",
     "dist": "npm run build && mkdir -p dist && NODE_ENV=production browserify index.js -s xus | uglifyjs -c > dist/xus.js",
-    "docs": "rm -fr examples/api && typedoc --includeDeclarations --name 'xūs API' --gaID 'UA-1238030-11' --gaSite 'tetsuo/xus' --out examples/api --mode file --excludePrivate --excludeNotExported --excludeExternals --theme node_modules/typedoc-theme --exclude '**/test/**' --jsx react src",
+    "docs": "rm -fr examples/api && typedoc --includeDeclarations --name 'xūs API' --gaID 'UA-1238030-11' --gaSite 'tetsuo/xus' --out docs --mode file --excludePrivate --excludeNotExported --excludeExternals --theme node_modules/typedoc-theme --exclude '**/test/**' --jsx react src",
     "prepublish": "npm run build && npm run test && npm run dist",
     "test": "tape lib/**/test/*.js",
     "test-diff": "tape lib/**/test/*.js | tap-diff",
@@ -50,7 +50,7 @@
     "tslint-eslint-rules": "^4.1.1",
     "tslint-react": "^3.0.0",
     "typedoc": "^0.7.1",
-    "typedoc-theme": "^0.1.2",
+    "typedoc-theme": "^0.1.3",
     "typescript": "^2.3.4",
     "uglify-js": "^3.0.23"
   },

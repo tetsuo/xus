@@ -21,6 +21,7 @@ build:
         name: docs
         code: |
             npm run docs
+            cp -R examples/* docs
 
 deploy:
   steps:
@@ -28,4 +29,4 @@ deploy:
         packages: git ssh-client
     - lukevivier/gh-pages@0.2.1:
         token: $GIT_TOKEN
-        basedir: examples
+        basedir: docs

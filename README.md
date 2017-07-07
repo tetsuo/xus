@@ -64,7 +64,7 @@ setInterval(function() {
 
 [See this example on CodePen.](https://codepen.io/anon/pen/jwKRbg)
 
-[See the Fruits example in the examples folder.](https://tetsuo.github.io/xus/example.html)
+[See more examples.](https://tetsuo.github.io/xus/fruits.html)
 
 # language constructs
 
@@ -176,13 +176,17 @@ xus("<foo class=bla><div>{n}</div></foo>", state, optionsWithRegistry, (err, res
 
 # internals
 
-The main function that is exposed is called `xus`, and it is only good for creating React/mobx trees.
+```javascript
+import * as xus from "xus"
+```
+
+The main function that is exposed is called `xus`, and it's only good for creating React/mobx trees.
 
 However, xūs does not ship with `React` and `mobxReact` (they need to be provided in `options`) and it can be rendered into a virtual tree (or just tree) of any kind, not necessarily into a React one.
 
 The following example shows how you can build a `virtual-dom` tree instead of React:
 
-```
+```javascript
 import { Template } from "xus/runtime"
 const createElement = require("virtual-dom/create-element")
 
@@ -192,8 +196,6 @@ const tree = render.call(new Template, { n: 1, m: 2 })
 
 const rootNode = createElement(tree)
 ```
-
-[See this example on CodePen.](https://codepen.io/anon/pen/jwKRbg)
 
 xūs `Template`s are mainly just straight-forward `render(state, options)` methods and they can be extended very easily.
 
