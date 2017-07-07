@@ -378,3 +378,22 @@ test("component registry", t => {
         t.end()
     })
 })
+
+test("tags in attrs", t => {
+    const state = {
+        foo: "qux",
+        bar: "quux"
+    }
+
+    build('<x  class={foo} for="{foo} {bar}">{bar}</x>', state, options, (er, el: React.ReactElement<any>, html) => {
+        t.error(er, html)
+        const w = shallow(el)
+
+        t.equal(w.html(), '<x class="qux" for="qux quux">quux</x>')
+
+        state.bar = "baz"
+        t.equal(w.html(), '<x class="qux" for="qux baz">baz</x>')
+
+        t.end()
+    })
+})
