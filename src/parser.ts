@@ -1,6 +1,7 @@
 import through = require("through2")
 import { LexerToken, LexerTokenIndex, LexerTokenKind } from "./lexer"
 import { ParseTree, ParseTreeIndex, ParseTreeKind } from "./runtime"
+const fromArray = require("from2-array")
 
 enum ParserState { InText = 0, InTag }
 
@@ -16,6 +17,8 @@ export function parse(): NodeJS.ReadWriteStream {
         let node: ParseTree | string /* text node */
 
         const self = this
+
+        let pending = false
 
         function write(newNode: any[]) { self.push(newNode) }
 
@@ -33,6 +36,36 @@ export function parse(): NodeJS.ReadWriteStream {
                 }
 
                 cursor = node
+
+                const attrs = node[ParseTreeIndex.Attrs]
+                let pendingCount = Object.keys(attrs).length
+
+                if (Object.keys(attrs).length) {
+                    pending = true
+
+                    Object.keys(attrs).forEach(attrKey => {
+                        const attrParser = parse()
+
+                        const attrTokens = [
+                            [ LexerTokenKind.Open, "root", {} ],
+                            [ LexerTokenKind.Close, "root", {} ]
+                        ]
+                        attrTokens.splice(1, 0, ...attrs[attrKey])
+
+                        fromArray.obj(attrTokens).pipe(attrParser)
+
+                        attrParser.once("data", attrNode => {
+                            node[ParseTreeIndex.Attrs][attrKey] = attrNode[ParseTreeIndex.Children]
+                        })
+
+                        attrParser.on("end", () => {
+                            if (--pendingCount === 0) {
+                                next()
+                            }
+                        })
+                    })
+                }
+
                 top.push(node[ParseTreeIndex.Children])
 
                 break
@@ -108,6 +141,8 @@ export function parse(): NodeJS.ReadWriteStream {
             default:
         }
 
-        next()
+        if (!pending) {
+            next()
+        }
     })
 }

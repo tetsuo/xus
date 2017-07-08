@@ -5,6 +5,17 @@ import { parse } from "../parser"
 
 const randomFixtures = [
     {
+        html: '<x class={foo} for="{foo} {bar}">{bar}</x>',
+        expected: [
+            "x",
+            {
+                class: [ [ 3, "foo" ] ],
+                for: [ [ 3, "foo" ], " ", [ 3, "bar" ] ]
+            },
+            [ [ 3, "bar" ] ]
+        ]
+    },
+    {
         // tslint:disable-next-line:max-line-length
         html: '<x><d>bla</d> {#foo} <y> <z>bom <c>{qux} {sox}</c><k></k></z>{quux} </y>bum {#bar}555<r></r><u></u>{/bar} 888{/foo} <k></k>333<d>{#qux}999{/qux}<h x="{nope}"></h></d> {jj}{dd}uu</x>',
         expected: [ "x", {},
@@ -48,29 +59,39 @@ const randomFixtures = [
                 " ",
                 [ "k", {}, [] ],
                 "333",
-                [ "d", {}, [ [ 2, "qux", [ "999" ] ], [ "h", { x: "{nope}" }, [] ] ] ],
+                [ "d", {}, [ [ 2, "qux", [ "999" ] ], [ "h", { x: [ [ 3, "nope" ] ] }, [] ] ] ],
                 " ",
                 [ 3, "jj" ],
                 [ 3, "dd" ],
                 "uu"
             ]
         ]
+    },
+    {
+        html: '<tr bg="{#hasx}{x}{/hasx}"><td bg={name} ag="{name} is" /></tr>',
+        expected: [
+            "tr",
+            { bg: [ [ 2, "hasx", [ [ 3, "x" ] ] ] ] }, /* props */
+            [
+                [ "td", { bg: [ [ 3, "name" ] ], ag: [ [ 3, "name" ], " is" ] }, [] /* no children */ ]
+            ]
+        ]
     }
 ]
 
-test("build random parse trees", t => {
+test("build parse trees", t => {
+    t.plan(randomFixtures.length)
     randomFixtures.forEach(fixture => {
         util.fromString(fixture.html)
             .pipe(tokenize())
             .pipe(parse())
             .once("data", actual => {
                 t.deepEqual(actual, fixture.expected)
-                t.end()
             })
     })
 })
 
-test("emit top-level errors", t => {
+test("emit top-level parsing errors", t => {
   const expected = [/text/, /section/, /variable/]
   t.plan(expected.length * 2)
 
