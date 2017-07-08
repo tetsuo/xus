@@ -4,6 +4,8 @@ logic-_less_ applications.
 
 [![wercker status](https://app.wercker.com/status/6bbc534414fb612cf8854ed1816068a2/s/master "wercker status")](https://app.wercker.com/project/byKey/6bbc534414fb612cf8854ed1816068a2)
 
+**Currently in alpha.**
+
 # introduction
 
 xūs is the name of the simple templating languge, it's parser and the runtime library which is built on top of [React](https://github.com/facebook/react) and [mobx](https://github.com/mobxjs/mobx).
