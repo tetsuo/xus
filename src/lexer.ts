@@ -40,9 +40,7 @@ const defaultSymbolMap = {
 /**
  * Given a a xūs template as input, will produce rows of [[LexerToken]]s.
  *
- *   `function render (state, options, constructor)`
- *
- * @param options  Override the symbol map and the default matchers.
+ * @param options  Override the symbol map and default matchers.
  */
 export function tokenize(options?: LexerOptions): NodeJS.ReadWriteStream {
     const tr = through.obj()
@@ -54,12 +52,31 @@ export function tokenize(options?: LexerOptions): NodeJS.ReadWriteStream {
         }
 
         if (kind === LexerTokenKind.Text) {
-            scan(value, options, function scan(er, scanKind, body) {
+            scan(value, options, function(er, scanKind, body) {
                 if (er) {
                     return void tr.emit(er.message)
                 }
                 tr.push([ scanKind, body ])
             })
+        } else if (kind === LexerTokenKind.Open) {
+            const attrTrees = {} as any
+
+            Object.keys(attrs).forEach(attrKey => {
+                const attrTree = []
+                scan(attrs[attrKey], options, function(er, scanKind, body) {
+                    if (er) {
+                        return void tr.emit(er.message)
+                    }
+
+                    attrTree.push([ scanKind, body ])
+                })
+
+                attrTrees[attrKey] = attrTree
+            })
+
+            token[LexerTokenIndex.Attrs] = attrTrees
+            tr.push(token)
+
         } else {
             tr.push(token)
         }

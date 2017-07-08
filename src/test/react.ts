@@ -6,8 +6,8 @@ import * as React from "react"
 import { xus as build } from "../"
 
 const options = {
-    React: React,
-    mobxReact: mobxReact
+    createElement: React.createElement,
+    observer: mobxReact.observer
 }
 
 test("render text and vars", t => {
@@ -18,6 +18,7 @@ test("render text and vars", t => {
 
     build("<x>sdf{baz}k{bar}</x>", state, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
+        // debugger
         const w = shallow(el)
 
         t.equal(w.html(), "<x>sdf456k123</x>")
@@ -375,6 +376,68 @@ test("component registry", t => {
         t.error(buildError, html)
         const w = shallow(el)
         t.equal(w.html(), '<div>1<c class="bla"><b>bold</b>1<bar>16</bar>125</c></div>')
+        t.end()
+    })
+})
+
+test("tags in attrs 1", t => {
+    const state = observable({
+        foo: "qux",
+        bar: "quux"
+    })
+
+    build('<x class={foo} for="{foo} {bar}">{bar}</x>', state, options, (er, el: React.ReactElement<any>, html) => {
+        t.error(er, html)
+        const w = shallow(el)
+
+        t.equal(w.html(), '<x class="qux" for="qux quux">quux</x>')
+
+        state.bar = "baz"
+        t.equal(w.html(), '<x class="qux" for="qux baz">baz</x>')
+
+        t.end()
+    })
+})
+
+test("tags in attrs 2", t => {
+    const state = observable({
+        foo: [ { n: 3 }, { n: 5 } ],
+        bar: "quux"
+    })
+
+    build('<x for="{#foo}{n} {/foo}"><p>{bar}{#foo}{n}{/foo}</p>{#foo}{n}{/foo}</x>', state, options, (er, el: React.ReactElement<any>, html) => {
+        t.error(er, html)
+        const w = shallow(el)
+
+        t.equal(w.html(), '<x for="3 5 "><p>quux35</p>35</x>')
+
+        state.foo.push({ n: 7 })
+        t.equal(w.html(), '<x for="3 5 7 "><p>quux357</p>357</x>')
+
+        t.end()
+    })
+})
+
+test("tags in attrs 3", t => {
+    const state = observable({
+        cond: true,
+        bar: "quux",
+        cond2: false
+    })
+
+    build('<x class="{#cond}{bar}{/cond}">{#cond}{bar}{#cond2}23{/cond2}{/cond}</x>', state, options, (er, el: React.ReactElement<any>, html) => {
+        t.error(er, html)
+        const w = shallow(el)
+
+        t.equal(w.html(), '<x class="quux">quux</x>')
+
+        state.cond = false
+        t.equal(w.html(), '<x class=""></x>')
+
+        state.cond = true
+        state.cond2 = true
+        t.equal(w.html(), '<x class="quux">quux23</x>')
+
         t.end()
     })
 })

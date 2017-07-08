@@ -8,7 +8,8 @@
 		"jsx": "react",
 		"experimentalDecorators": true,
 		"noUnusedLocals": true,
-		"noImplicitReturns": true
+		"noImplicitReturns": true,
+		"sourceMap": true
 	},
 	"include": [
 		"src/**/*.ts",

@@ -12,20 +12,23 @@ export * from "./runtime"
 /**
  * Turns a xūs template into a reactive component tree using `React` and `mobx-react`.
  *
- * @param template  xūs template string.
- * @param state  An observable state object created with `mobx.observable`.
- * @param options  xūs does not ship with `React` and `mobx-react`, you provide them in this object.
- * @param cb  Returns a `ReactElement` which then can be rendered to DOM with `ReactDOM.render`.
+ * Returns a `ReactElement` which then can be rendered into DOM with `ReactDOM.render`.
+ *
+ * @param template
+ * @param state
+ * @param options
+ * @param cb
  */
-export function xus(template: string, state: any, options: RenderOptions, cb: (error: Error, element?: React.ReactNode, template?: string) => void) {
+export function xus<P>(template: string, state: { [s: string]: any }, options: RenderOptions<P>,
+                       cb: (error: Error, element?: React.ReactElement<P>, template?: string) => void) {
     if (!options ||
         (typeof options === "object") &&
-        (!options.hasOwnProperty("React") ||
-        !options.hasOwnProperty("mobxReact"))) {
-        throw new Error("you must provide React and mobxReact")
+        (!options.hasOwnProperty("createElement") ||
+        !options.hasOwnProperty("observer"))) {
+        throw new Error("you must provide 'createElement' and 'observer'")
     }
 
-    return compile<React.ReactNode>(template, (er, ctx?) => {
+    return compile<React.ReactElement<P>>(template, (er, ctx?) => {
         if (er) {
             return cb(er)
         }
@@ -37,12 +40,11 @@ export function xus(template: string, state: any, options: RenderOptions, cb: (e
  * Given a a xūs template as input, will produce rows of pre-compiled functions that can be
  * evaluated for rendering and have the following structure:
  *
- *   `function render (state, options, constructor)`
+ *   `function render(state, options, constructor)`
  *
  * You can pass a `constructor` to create an execution context at runtime, or
  * use `render.call()` to bind an existing one.
  *
- * @typeparam T  Expected resulting node type, e.g. `React.ReactNode`.
  * @param template  xūs template string.
  * @param cb  If provided, the emitted rows are also passed to the callback function.
  */
@@ -72,6 +74,8 @@ export function compile<T>(template: string, cb?: (error: Error, ctx?: TemplateC
 
 /**
  * Utilities.
+ *
+ * @hidden
  */
 export namespace util {
     /**

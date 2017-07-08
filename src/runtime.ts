@@ -23,7 +23,7 @@ const selfClosingTags = [
  * It will either instantiate a new [[Template]] or use the provided one in `ctor` parameter, and call
  * [[Template.render]] method with this value.
  */
-export type TemplateContext<U> = (state: any, options: BaseRenderOptions<U>, ctor?: TemplateConstructor<U>) => U[]
+export type TemplateContext<U> = (state: any, options: RenderOptions<U>, ctor?: TemplateConstructor<U>) => U[]
 
 export enum ParseTreeKind {
     Section = 2,
@@ -39,39 +39,46 @@ export enum ParseTreeIndex {
 
 export interface ParseTree extends Array<any> {
     0: ParseTreeKind | string /* tag name */
-    1: ({ [s: string]: any } | null) | string /* node ref (section/variable names) */
+    1: ({ [s: string]: ParseTree[] } | null) /* props */ | string /* node ref (section/variable names) */
     2?: ParseTree[] /* children */
     3?: ParseTree /* parent */
 }
 
-export interface CreateElementOptions<U> {
+export interface VisitorOptions<U> {
     attributes?: { [s: string]: any } | null
     parseTree?: ParseTree
-    visitor?: (children: (U | string)[] | null, node: ParseTree | string, top?: any[]) => U[]
+    traverseChildren?: (children: (U | string)[] | null, node: ParseTree | string, top?: any[]) => U[]
     state?: any
 }
 
-export interface BaseRenderOptions<U> {
-    createElement?: (type: string, options: CreateElementOptions<U>, children: U[]) => U
+/**
+ * An `ObserverFactory` is a `Function` that turns a `ReactComponent` into a reactive `ReactComponent`,
+ * an example implementation on top of `mobx` is `mobx-react`.
+ */
+export type ObserverFactory<P> = /* TODO: send a pr to mobx-react for these factory types */
+    (componentClass: React.ComponentClass<P> | React.StatelessComponent<P>) => React.ReactElement<P>
+
+export interface RenderOptions<P> {
+    createElement: React.Factory<P>
+    registry?: { [s: string]: any }
+    observer: ObserverFactory<P>
 }
 
-export interface RenderOptions extends BaseRenderOptions<React.ReactNode> {
-    registry?: { [s: string]: any }
-    React: any
-    mobxReact: any
+export interface TemplateOptions<U> {
+    visitNode: (type: string, options: VisitorOptions<U>, children: U[]) => U
 }
 
 export interface TemplateInterface<U> {
     root: ParseTree
-    options?: BaseRenderOptions<U>
-    render: (state: any, options: BaseRenderOptions<U>) => U[]
+    options?: TemplateOptions<U>
+    render: (state: any, options: TemplateOptions<U>) => U[]
 }
 
 /**
  * @hidden
  */
 export interface TemplateConstructor<U> {
-    new (options: BaseRenderOptions<U>): TemplateInterface<U>
+    new (options: TemplateOptions<U>): TemplateInterface<U>
 }
 
 /**
@@ -86,20 +93,20 @@ export interface TemplateConstructor<U> {
 export class Template<U> implements TemplateInterface<U> {
     root: ParseTree
 
-    options?: BaseRenderOptions<U>
+    options?: TemplateOptions<U>
 
-    constructor(options?: BaseRenderOptions<U>) {
+    constructor(options?: TemplateOptions<U>) {
         this.options = options
     }
 
-    render(state: any, options: BaseRenderOptions<U>): U[] {
+    render(state: any, options?: TemplateOptions<U>): U[] {
         this.options = { ...this.options, ...options }
         return this.traverse(null, this.root, [ state ])
     }
 
     protected traverse: (children: (U | string)[] | null, node: ParseTree | string, top?: any[]) => U[] = (children, node, top?) => {
         const {
-            createElement
+            visitNode
         } = this.options
 
         if (!Array.isArray(node)) {
@@ -111,21 +118,23 @@ export class Template<U> implements TemplateInterface<U> {
             let right: any[] = []
             this._reduceTree(node, top, right)
 
+            let propAttrs = node[ParseTreeIndex.Attrs]
+
             let element: any
-            const tag = node[ParseTreeIndex.Tag] as string
-            const props = {
-                ...this._formatAttributes(node[ParseTreeIndex.Attrs] as { [s: string]: any }),
+            const tag = node[ParseTreeIndex.Tag]
+            const visitorOptions = {
+                ...this._formatAttributes(propAttrs as { [s: string]: any }),
                 ...{
                     parseTree: node,
                     state: top,
-                    visitor: this.traverse
+                    traverseChildren: this.traverse
                 }
             }
 
-            if ("function" === typeof createElement) {
-                element = createElement(tag, props, right)
+            if ("function" === typeof visitNode) {
+                element = visitNode(tag as string, visitorOptions, right)
             } else {
-                element = { tag, props, children: right }
+                element = { tag, props: propAttrs, children: right } // XXX:
             }
 
             if (!children) {
@@ -177,16 +186,24 @@ export class Template<U> implements TemplateInterface<U> {
     }
 
     private _formatAttributes(attrs: { [s: string]: any }): { attributes?: { [s: string]: any }} {
-        if (Object.keys(attrs).length) {
+        if ((typeof attrs === "object" && attrs !== null) && Object.keys(attrs).length) {
             return { attributes: attrs }
         }
         return {}
     }
 }
 
-function buildElement(options: RenderOptions, internalOptions: CreateElementOptions<React.ReactNode>): React.ReactElement<any> {
-    const { React } = options
-    const { parseTree, visitor, state } = internalOptions
+/**
+ * Builds a `ReactElement`.
+ *
+ * Normalizes property names for React and ensures that we have a valid `ReactElement`.
+ *
+ * @param options
+ * @param visitorOptions
+ */
+function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOptions<React.ReactElement<T>>): React.ReactElement<T> {
+    const { createElement } = options
+    const { parseTree, traverseChildren, state } = visitorOptions
 
     let type = parseTree[ParseTreeIndex.Tag] as any
 
@@ -198,23 +215,43 @@ function buildElement(options: RenderOptions, internalOptions: CreateElementOpti
 
     let visitChildren = (selfClosingTags.indexOf(type) === -1)
 
-    let attrs = parseTree[ParseTreeIndex.Attrs] as { [s: string]: any } | null
+    let attrs = visitorOptions.attributes
 
     if (attrs === null || typeof attrs !== "object") {
         attrs = {}
     }
 
-    const normalizedProps = Object.keys(attrs).reduce((acc: any, key) => {
+    let newAttrs = attrs as any
+
+    Object.keys(attrs).forEach(propKey => {
+        const tpl = new Template<{ [s: string]: any }>({
+            visitNode: (propType, propOptions, propChildren) => {
+                const propParseTree = propOptions.parseTree
+                const traverseFn = propOptions.traverseChildren
+                const newPropChildren = (propParseTree[ParseTreeIndex.Children] as (ParseTree | string)[])
+                    .reduce<{ [s: string]: any }[]>((acc: ({ [s: string]: any } | string)[], childTree: (ParseTree | string)) => {
+                        return traverseFn(acc, childTree, [ state ])
+                    }, [])
+                return {
+                    [propKey]: newPropChildren.join("")
+                }
+            }
+        })
+        tpl.root = [ "root", null, attrs[propKey] ]
+        newAttrs = { ...newAttrs, ...tpl.render(state) }
+    })
+
+    const normalizedProps = Object.keys(newAttrs).reduce((acc: any, key) => {
         key = key.toLowerCase()
 
-        let value: any = attrs[key]
+        let value: any = newAttrs[key]
 
         if (typeof type === "string" && (type === "input" || type === "textarea")) {
-            if (attrs.hasOwnProperty("checked")) {
-                acc.defaultChecked = attrs.checked
+            if (newAttrs.hasOwnProperty("checked")) {
+                acc.defaultChecked = newAttrs.checked
             }
-            if (attrs.hasOwnProperty("value")) {
-                acc.defaultValue = attrs.value
+            if (newAttrs.hasOwnProperty("value")) {
+                acc.defaultValue = newAttrs.value
                 if (type === "textarea") {
                     visitChildren = false
                 }
@@ -228,76 +265,73 @@ function buildElement(options: RenderOptions, internalOptions: CreateElementOpti
         }
 
         return acc
-    }, {}) as any
+    }, {}) as { [s: string]: any }
 
     if (visitChildren) {
         children = (parseTree[ParseTreeIndex.Children] as (ParseTree | string)[])
-            .reduce<React.ReactNode[]>((acc: (React.ReactNode | string)[], childTree: (ParseTree | string)) => {
-                return visitor(acc, childTree, [ state ])
+            .reduce<React.ReactElement<any>[]>((acc: (React.ReactElement<any>)[], childTree: (ParseTree | string)) => {
+                return traverseChildren(acc, childTree, [ state ])
             }, [])
     }
 
-    return React.createElement(type, normalizedProps, children)
+    return createElement(type, normalizedProps, children)
 }
 
 /**
- * Renders a [[TemplateContext]] into a `ReactNode`.
+ * Renders a [[TemplateContext]] into a `ReactElement`.
  *
- * If a tag name doesn't resolve to a `React.ComponentClass` in the provided `options.registry`, xūs will
- * by default assume it is an ordinary HTML tag and wrap it in `mobxReact.observer`. If a `ComponentClass`
- * is found instead, then it is up to the provider to wrap it up with `mobxReact`, or not.
+ * If a tag name doesn't resolve to a `ComponentClass` in the provided `options.registry`, xūs will
+ * by default assume it is an ordinary HTML tag and wrap it in `observer`. If a `ComponentClass`
+ * is found instead, then it's up to the provider to make this an observer, or not.
  *
  * @param ctx  A [[TemplateContext]] created with [[compile]].
- * @param state  An object created with `mobx.observable`.
+ * @param state
  * @param options
  */
-export function render(ctx: TemplateContext<React.ReactNode>, state: any, options: RenderOptions): React.ReactNode {
+export function render<P>(ctx: TemplateContext<React.ReactElement<P>>, state: { [s: string]: any }, options: RenderOptions<P>): React.ReactElement<P> {
     if (!options ||
         (typeof options === "object") &&
-        (!options.hasOwnProperty("React") ||
-        !options.hasOwnProperty("mobxReact"))) {
-        throw new Error("you must provide React and mobxReact")
+        (!options.hasOwnProperty("createElement") || !options.hasOwnProperty("observer"))) {
+        throw new Error("you must provide 'createElement' and 'observer'")
     }
 
-    const {
-        React,
-        mobxReact
-    } = options
+    const { createElement, observer } = options
 
     const registry = {
-        ObserverComponent: mobxReact.observer(buildElement.bind(null, options))
+        ObserverComponent: observer(visitObserver.bind(null, options))
     }
 
     if (options.registry) {
         Object.keys(options.registry).forEach(type => {
-            registry[type] = buildElement.bind(null, options)
+            registry[type] = visitObserver.bind(null, options)
         })
     }
 
     const element = ctx.call(new Template, state, {
         ...{
             registry: registry,
-            createElement: createElement
-        },
+            visitNode: _visitNode
+        } as TemplateOptions<any>,
         ...options
     })
 
-    function createElement(
+    function _visitNode(
         type: string,
         // tslint:disable-next-line:no-shadowed-variable
-        options: CreateElementOptions<React.ReactNode>,
+        options: VisitorOptions<React.ReactElement<any>>,
         children: (React.ReactNode | string)[]) {
 
         const factory = registry.hasOwnProperty(type)
             ? registry[type]
             : registry.ObserverComponent
 
-        return React.createElement(
+        return createElement(
             factory,
             {
-                parseTree: options.parseTree,
-                visitor: options.visitor,
-                state: options.state[options.state.length - 1]
+                ...options,
+                ...{
+                    state: options.state[options.state.length - 1]
+                }
             },
             children)
     }
@@ -309,11 +343,16 @@ function isArray(value: any) {
     return Array.isArray(value) || isObservableArray(value)
 }
 
-function isObservableArray(value: any) { // poor man's isObservableArray
+/**
+ * Poor man's `isObservableArray`.
+ *
+ * @param value
+ */
+function isObservableArray(value: any) {
     return isObject(value) &&
         (value.hasOwnProperty("$mobx") &&
          typeof value["$mobx"].constructor === "function" &&
-         value["$mobx"].constructor.name === "ObservableArrayAdministration") // XXX: watch out for this one
+         value["$mobx"].constructor.name === "ObservableArrayAdministration") /* XXX: watch out for this one */
 }
 
 function isObject(value: any): boolean {

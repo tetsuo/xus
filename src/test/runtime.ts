@@ -131,7 +131,7 @@ test("static trees", t => {
         build(fixture.html, fixture.state, {
             createElement: (tag, props, children) => {
                 delete props.parseTree
-                delete props.visitor
+                delete props.traverseChildren
                 delete props.state
                 return { tag, props, children }
             }
@@ -139,18 +139,5 @@ test("static trees", t => {
             t.error(buildError, html)
             t.deepEqual(actual, fixture.expected)
         })
-    })
-})
-
-test("format attributes", t => {
-    build(`<x data-qq="555" style="background-color: #fff; color: #ccc"></x>`, { title: "qq" }, {}, (buildError, res, html) => {
-        t.error(buildError, html)
-        t.equal(res.tag, "x")
-        t.ok(res.props.hasOwnProperty("attributes"))
-        t.deepEqual(res.props.attributes, {
-            "data-qq": "555",
-            style: "background-color: #fff; color: #ccc"
-        })
-        t.end()
     })
 })

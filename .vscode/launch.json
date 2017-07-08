@@ -6,6 +6,7 @@
             "request": "launch",
             "name": "Launch Test",
             "program": "${workspaceRoot}/lib/test/${fileBasenameNoExtension}.js",
+            "sourceMaps": true,
             "outFiles": []
         }
     ]
