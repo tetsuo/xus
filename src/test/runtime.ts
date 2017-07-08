@@ -131,7 +131,7 @@ test("static trees", t => {
         build(fixture.html, fixture.state, {
             createElement: (tag, props, children) => {
                 delete props.parseTree
-                delete props.visitor
+                delete props.traverseChildren
                 delete props.state
                 return { tag, props, children }
             }
