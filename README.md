@@ -65,7 +65,7 @@ setInterval(function() {
 }, 1000)
 ```
 
-[See this example on CodePen.](https://codepen.io/anon/pen/jwKRbg)
+[See this example on CodePen.](https://codepen.io/anon/pen/vZVxjW)
 
 [See more examples.](https://tetsuo.github.io/xus/fruits.html)
 
