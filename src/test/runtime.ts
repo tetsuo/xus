@@ -141,16 +141,3 @@ test("static trees", t => {
         })
     })
 })
-
-test("format attributes", t => {
-    build(`<x data-qq="555" style="background-color: #fff; color: #ccc"></x>`, { title: "qq" }, {}, (buildError, res, html) => {
-        t.error(buildError, html)
-        t.equal(res.tag, "x")
-        t.ok(res.props.hasOwnProperty("attributes"))
-        t.deepEqual(res.props.attributes, {
-            "data-qq": "555",
-            style: "background-color: #fff; color: #ccc"
-        })
-        t.end()
-    })
-})
