@@ -4,13 +4,11 @@ logic-_less_ applications.
 
 [![wercker status](https://app.wercker.com/status/6bbc534414fb612cf8854ed1816068a2/s/master "wercker status")](https://app.wercker.com/project/byKey/6bbc534414fb612cf8854ed1816068a2)
 
-**Currently in alpha.**
-
 # introduction
 
-xūs is the name of the simple templating languge, it's parser and the runtime library which is built on top of [React](https://github.com/facebook/react) and [mobx](https://github.com/mobxjs/mobx).
+xūs is the name of the simple templating languge, it's parser and the runtime library.
 
-In combination with React and mobx, xūs can compile itself into a React-_ive_ component tree, allowing it to get notified of the changes on the `state` object and re-render the component tree when it's necessary, as how it was structured in xūs in the first place.
+In combination with [React](https://github.com/facebook/react) and [mobx](https://github.com/mobxjs/mobx), xūs can compile itself into a React-_ive_ component tree, allowing it to get notified of the changes on the `state` object and re-render the tree when it's necessary, as how it was structured in xūs in the first place.
 
 # install
 
@@ -47,7 +45,10 @@ const state = mobx.observable({
 produce a `ReactElement` with `xus` and render it using `ReactDOM`:
 
 ```javascript
-var options = { React: React, mobxReact: mobxReact }
+var options = {
+  createElement: React.createElement,
+  observer: mobxReact.observer
+}
 
 xus(template, state, options, function(er, newElement) {
   if (er) throw er
@@ -146,7 +147,9 @@ output:
 
 # registry mechanism
 
-You can pass in your own component factories in `options.registry`. By default, xūs will assume your HTML tags are normal HTML tags unless they resolve to something else in the `registry` you provided.
+You can pass in your own component factories in `options.registry`.
+
+By default, xūs will assume your HTML tags are normal HTML tags unless they resolve to something else in the `registry` you provided.
 
 example:
 
@@ -184,7 +187,7 @@ import * as xus from "xus"
 
 The main function that is exposed is called `xus`, and it's only good for creating React/mobx trees.
 
-However, xūs does not ship with `React` and `mobxReact` (they need to be provided in `options`) and it can be rendered into a virtual tree (or just tree) of any kind, not necessarily into a React one.
+However, xūs does not ship with `React` and/or `mobx-react` and it can be rendered into a virtual tree (or just tree) of any kind, not necessarily into an observer component tree.
 
 The following example shows how you can build a `virtual-dom` tree instead of React:
 
@@ -209,12 +212,12 @@ Installing xūs with npm brings with it type definitions for TypeScript as well.
 
 ## streams
 
-xūs can handle nodejs streams. But this will most likely change in the future (at least for the UMD-bundle to keep the file size as small as possible).
+xūs can handle nodejs streams.
 
 # roadmap
 
 This project has just started and it aims to make building reactive user layouts incredibly easy!
 
-It's currently nowhere near the JSX (the syntax extension to JavaScript) or any of the other alternatives.
+It's stable enough to be used as the foundation for simple web applications that show data only (e.g. your next team Dashboard) But that's pretty much about it. The xūs language itself and how it fits with the `hippo`-thetical state definition language are still being explored.
 
 See the [Issues page](https://github.com/tetsuo/xus/issues) for a list of known bugs and planned features.
