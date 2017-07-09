@@ -2,6 +2,7 @@ import { shallow } from "enzyme"
 import test = require("tape")
 import { observable } from "mobx"
 import * as mobxReact from "mobx-react"
+import { types } from "mobx-state-tree"
 import * as React from "react"
 import { xus as build } from "../"
 
@@ -438,6 +439,48 @@ test("tags in attrs 3", t => {
         state.cond2 = true
         t.equal(w.html(), '<x class="quux">quux23</x>')
 
+        t.end()
+    })
+})
+
+test("mobx-state-tree section context", t => {
+    const Todo = types.model("Todo", {
+        title: types.string,
+        done: true
+    }, {
+        toggle() {
+            this.done = !this.done
+        }
+    })
+
+    const State = types.model("State", {
+        todos: types.array(Todo)
+    })
+
+    const state = State.create({
+        todos: [
+            { title: "Get coffee" },
+            { title: "Do something" }
+        ]
+    })
+
+    build('<ul>{#todos}<li class="{#done}task-done{/done}">{title}</li>{/todos}</ul>', state, options, (er, el: React.ReactElement<any>, html) => {
+        t.error(er, html)
+        const w = shallow(el)
+        t.equal(w.html(), '<ul><li class="task-done">Get coffee</li><li class="task-done">Do something</li></ul>')
+        state.todos[0].toggle()
+        t.equal(w.html(), '<ul><li>Get coffee</li><li class="task-done">Do something</li></ul>')
+        state.todos[0].toggle()
+        t.equal(w.html(), '<ul><li class="task-done">Get coffee</li><li class="task-done">Do something</li></ul>')
+        t.end()
+    })
+})
+
+test("self closing tags", t => {
+    build("<form><input type=text /><input type=submit /><hr /></form>", {}, options, (er, el, html) => {
+        t.error(er, html)
+        const w = shallow(el)
+        t.equal(w.html(), '<form><input type="text"/><input type="submit"/><hr/></form>')
         t.end()
     })
 })
