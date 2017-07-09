@@ -350,8 +350,9 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
             const eventNameIndex = lowerCaseSyntheticEvents.indexOf(key)
             if (eventNameIndex !== -1) {
                 acc[syntheticEvents[eventNameIndex]] = value
+            } else {
+                acc[key] = value
             }
-            acc[key] = value
         }
 
         return acc
