@@ -2,6 +2,7 @@ import { shallow } from "enzyme"
 import test = require("tape")
 import { observable } from "mobx"
 import * as mobxReact from "mobx-react"
+import { types } from "mobx-state-tree"
 import * as React from "react"
 import { xus as build } from "../"
 
@@ -351,7 +352,7 @@ test("convert to jsx attrs", t => {
     build("<div class=xw><input class=de type=radio /><textarea value=555 /><input type=text value=333 /></div>", {}, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
-        t.equal(w.html(), '<div class="xw"><input class="de"/><textarea>555</textarea><input value="333"/></div>')
+        t.equal(w.html(), '<div class="xw"><input type="radio" class="de"/><textarea>555</textarea><input type="text" value="333"/></div>')
         t.end()
     })
 })
@@ -432,12 +433,54 @@ test("tags in attrs 3", t => {
         t.equal(w.html(), '<x class="quux">quux</x>')
 
         state.cond = false
-        t.equal(w.html(), '<x class=""></x>')
+        t.equal(w.html(), "<x></x>")
 
         state.cond = true
         state.cond2 = true
         t.equal(w.html(), '<x class="quux">quux23</x>')
 
+        t.end()
+    })
+})
+
+test("mobx-state-tree section context", t => {
+    const Todo = types.model("Todo", {
+        title: types.string,
+        done: true
+    }, {
+        toggle() {
+            this.done = !this.done
+        }
+    })
+
+    const State = types.model("State", {
+        todos: types.array(Todo)
+    })
+
+    const state = State.create({
+        todos: [
+            { title: "Get coffee" },
+            { title: "Do something" }
+        ]
+    })
+
+    build('<ul>{#todos}<li class="{#done}task-done{/done}">{title}</li>{/todos}</ul>', state, options, (er, el: React.ReactElement<any>, html) => {
+        t.error(er, html)
+        const w = shallow(el)
+        t.equal(w.html(), '<ul><li class="task-done">Get coffee</li><li class="task-done">Do something</li></ul>')
+        state.todos[0].toggle()
+        t.equal(w.html(), '<ul><li>Get coffee</li><li class="task-done">Do something</li></ul>')
+        state.todos[0].toggle()
+        t.equal(w.html(), '<ul><li class="task-done">Get coffee</li><li class="task-done">Do something</li></ul>')
+        t.end()
+    })
+})
+
+test("self closing tags", t => {
+    build("<form><input type=text /><input type=submit /><hr /></form>", {}, options, (er, el, html) => {
+        t.error(er, html)
+        const w = shallow(el)
+        t.equal(w.html(), '<form><input type="text"/><input type="submit"/><hr/></form>')
         t.end()
     })
 })

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>xūs todos demo</title>
+        <!--you should consider browserifying all of these (see: https://github.com/tetsuo/xusify)-->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.min.js"></script>
+        <script src="//unpkg.com/mobx@3.1.16/lib/mobx.umd.js"></script>
+        <script src="//unpkg.com/mobx-react@4.2.2"></script>
+        <script src="//unpkg.com/mobx-state-tree@0.8.2/dist/mobx-state-tree.umd.js"></script>
+        <script src="//unpkg.com/xus@0.7.0/dist/xus.js"></script>
+        <style>
+            .finished {
+                background-color: aquamarine;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>xūs todos demo</h1>
+
+        <div id="main">
+            <div>
+                <form onsubmit="add">
+                    <input type="text" id="input" />
+                    <input type="submit" value="Add task" />
+                </form>
+                <p>You have completed <b>{completedCount}</b> of your tasks. Congratulations!</p>
+                <p><b>Click on more tasks to finish them!</b><p>
+                <ul>
+                    {#todos}
+                        <li class="{#done}finished{/done}" onClick="toggle">{title}</li>
+                    {/todos}
+                </ul>
+            <div>
+        </div>
+        <hr />
+        <p><a href="https://github.com/tetsuo/xus/blob/master/examples/demo.html">source</a></p>
+        <p><a href="https://tetsuo.github.io/xus/">xūs API homepage</a></p>
+        <script>
+            const types = mobxStateTree.types
+
+            const Todo = types.model("Todo", {
+                title: types.string,
+                done: true
+            }, {
+                toggle() {
+                    this.done = !this.done
+                }
+            })
+
+            const State = types.model("State", {
+                todos: types.array(Todo),
+                get completedCount() {
+                    return this.todos.reduce((count, todo) => (todo.done ? count + 1 : count), 0)
+                }
+            }, {
+                add(event) {
+                    event.preventDefault()
+
+                    const currentTarget = event.currentTarget
+                    const input = currentTarget.querySelector("input[type=text]")
+
+                    if (!input.value.length) {
+                        return
+                    }
+
+                    this.todos.unshift({
+                        title: input.value,
+                        done: false
+                    })
+
+                    input.value = ""
+                }
+            })
+
+            const state = State.create({
+                todos: [
+                    { title: "Get coffee", done: false },
+                    { title: "Wake up", done: true }
+                ]
+            })
+
+            var targetElement = document.getElementById("main")
+
+            var options = {
+                createElement: React.createElement,
+                observer: mobxReact.observer
+            }
+
+            // ...aaand, action!
+            xus(targetElement.innerHTML, state, options, (er, newElement) => {
+                if (er) throw er
+
+                ReactDOM.render(newElement, targetElement)
+
+                document.getElementById("input").focus()
+            })
+        </script>
+    </body>
+</html>
