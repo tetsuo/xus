@@ -4,63 +4,85 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>xūs Examples</title>
+        <title>xūs todos demo</title>
+        <!--you should consider browserifying all of these (see: https://github.com/tetsuo/xusify)-->
         <script src="//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.min.js"></script>
         <script src="//unpkg.com/mobx@3.1.16/lib/mobx.umd.js"></script>
         <script src="//unpkg.com/mobx-react@4.2.2"></script>
+        <script src="//unpkg.com/mobx-state-tree@0.8.2/dist/mobx-state-tree.umd.js"></script>
         <script src="../dist/xus.js"></script>
         <style>
-.fruits {
-    background-color: aquamarine;
-}
+            .finished {
+                background-color: aquamarine;
+            }
         </style>
     </head>
     <body>
-        <h1>Fruits</h1>
+        <h1>xūs todos demo</h1>
 
-        <form onsubmit="addFruit(event); return false">
-            <input type="text" id="input" />
-            <input type="submit" value="Add fruit" />
-        </form>
-
-        <div id="list">
+        <div id="main">
             <div>
-                <p>You have <b>{count}</b> fruits:</p>
+                <form onsubmit="add">
+                    <input type="text" id="input" />
+                    <input type="submit" value="Add task" />
+                </form>
+                <p>You have completed <b>{completedCount}</b> of your tasks. Congratulations!</p>
+                <p><b>Click on more tasks to finish them!</b><p>
                 <ul class="fruits">
-                    {#fruits}
-                    <li>{name}</li>
-                    {/fruits}
+                    {#todos}
+                        <li class="{#done}finished{/done}" onClick="toggle">{title}</li>
+                    {/todos}
                 </ul>
-            </div>
+            <div>
         </div>
-
+        <hr />
+        <p><a href="https://tetsuo.github.io/xus/">see xūs homepage</a></p>
         <script>
-            // create a new state object using mobx (see: https://github.com/mobxjs/mobx)
-            var state = mobx.observable({
-                fruits: [
-                    { name: "Mango" },
-                    { name: "Kiwi" }
-                ],
-                count: mobx.computed(function() { // 'count' tracks the number of fruits
-                    return this.fruits.length
-                })
+            const types = mobxStateTree.types
+
+            const Todo = types.model("Todo", {
+                title: types.string,
+                done: true
+            }, {
+                toggle() {
+                    this.done = !this.done
+                }
             })
 
-            function addFruit(event) { // executed when form is submitted, adds a new item to the 'state.fruits' array
-                var input = document.getElementById("input")
-                var value = input.value
+            const State = types.model("State", {
+                todos: types.array(Todo),
+                get completedCount() {
+                    return this.todos.reduce((count, todo) => (todo.done ? count + 1 : count), 0)
+                }
+            }, {
+                add(event) {
+                    event.preventDefault()
 
-                state.fruits.push({ name: value })
+                    const currentTarget = event.currentTarget
+                    const input = currentTarget.querySelector("input[type=text]")
 
-                input.value = ""
-                input.focus()
-            }
-        </script>
+                    if (!input.value.length) {
+                        return
+                    }
 
-        <script>
-            var templateElement = document.getElementById("list")
-            var template = templateElement.innerHTML
+                    this.todos.unshift({
+                        title: input.value,
+                        done: false
+                    })
+
+                    input.value = ""
+                }
+            })
+
+            const state = State.create({
+                todos: [
+                    { title: "Get coffee", done: false },
+                    { title: "Wake up", done: true }
+                ]
+            })
+
+            var targetElement = document.getElementById("main")
 
             var options = {
                 createElement: React.createElement,
@@ -68,11 +90,10 @@
             }
 
             // ...aaand, action!
-            xus(template, state, options, function(er, newElement) {
+            xus(targetElement.innerHTML, state, options, (er, newElement) => {
                 if (er) throw er
 
-                // render the newly generated element using ReactDOM
-                ReactDOM.render(newElement, templateElement)
+                ReactDOM.render(newElement, targetElement)
 
                 document.getElementById("input").focus()
             })
