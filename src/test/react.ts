@@ -351,7 +351,7 @@ test("convert to jsx attrs", t => {
     build("<div class=xw><input class=de type=radio /><textarea value=555 /><input type=text value=333 /></div>", {}, options, (buildError, el: React.ReactElement<any>, html) => {
         t.error(buildError, html)
         const w = shallow(el)
-        t.equal(w.html(), '<div class="xw"><input class="de"/><textarea>555</textarea><input value="333"/></div>')
+        t.equal(w.html(), '<div class="xw"><input type="radio" class="de"/><textarea>555</textarea><input type="text" value="333"/></div>')
         t.end()
     })
 })
@@ -432,7 +432,7 @@ test("tags in attrs 3", t => {
         t.equal(w.html(), '<x class="quux">quux</x>')
 
         state.cond = false
-        t.equal(w.html(), '<x class=""></x>')
+        t.equal(w.html(), "<x></x>")
 
         state.cond = true
         state.cond2 = true
