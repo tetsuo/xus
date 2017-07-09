@@ -93,7 +93,7 @@ export function tokenize(options?: LexerOptions): NodeJS.ReadWriteStream {
             pushToken(LexerTokenKind.Text, value)
         }
     }, {
-        xmlMode: true
+        xmlMode: false /* XXX: attribute names are being inconsistently lowercased (or not) in the browser */
     })
 
     return duplexify.obj(parser, tr)
