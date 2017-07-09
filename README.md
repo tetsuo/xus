@@ -97,7 +97,7 @@ xus(template, state, options, function(er, newElement) {
 
 [See the full example here.](https://tetsuo.github.io/xus/demo.html)
 
-[See example on CodePen.](https://codepen.io/anon/pen/vZVxjW)
+[See example on CodePen.](https://codepen.io/anon/pen/Xgxqqb)
 
 # language semantics
 
