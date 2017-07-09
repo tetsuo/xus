@@ -17,6 +17,80 @@ const selfClosingTags = [
     "wbr"
 ]
 
+const syntheticEvents = [
+    "onTransitionEnd",
+    "onAnimationStart",
+    "onAnimationEnd",
+    "onAnimationIteration",
+    "onLoad",
+    "onError",
+    "onAbort",
+    "onCanPlay",
+    "onCanPlayThrough",
+    "onDurationChange",
+    "onEmptied",
+    "onEncrypted",
+    "onEnded",
+    "onError",
+    "onLoadedData",
+    "onLoadedMetadata",
+    "onLoadStart",
+    "onPause",
+    "onPlay",
+    "onPlaying",
+    "onProgress",
+    "onRateChange",
+    "onSeeked",
+    "onSeeking",
+    "onStalled",
+    "onSuspend",
+    "onTimeUpdate",
+    "onVolumeChange",
+    "onWaiting",
+    "onWheel",
+    "onScroll",
+    "onTouchCancel",
+    "onTouchEnd",
+    "onTouchMove",
+    "onTouchStart",
+    "onSelect",
+    "onClick",
+    "onContextMenu",
+    "onDoubleClick",
+    "onDrag",
+    "onDragEnd",
+    "onDragEnter",
+    "onDragExit",
+    "onDragLeave",
+    "onDragOver",
+    "onDragStart",
+    "onDrop",
+    "onMouseDown",
+    "onMouseEnter",
+    "onMouseLeave",
+    "onMouseMove",
+    "onMouseOut",
+    "onMouseOver",
+    "onMouseUp",
+    "onChange",
+    "onInput",
+    "onSubmit",
+    "onFocus",
+    "onBlur",
+    "onKeyDown",
+    "onKeyPress",
+    "onKeyUp",
+    "onCompositionEnd",
+    "onCompositionStart",
+    "onCompositionUpdate",
+    "onCopy",
+    "onCut",
+    "onPaste"
+]
+
+const lowerCaseSyntheticEvents =
+    syntheticEvents.map(d => d.toLowerCase())
+
 /**
  * A `TemplateContext` is a `Function` that has a local value of a [[ParseTree]].
  *
@@ -233,11 +307,14 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
                         return traverseFn(acc, childTree, [ state ])
                     }, [])
 
-                const propValue = newPropChildren.join("")
+                let propValue = newPropChildren.join("") as any
 
                 if (propValue.length) {
+                    if (state.hasOwnProperty(propValue) && typeof state[propValue] === "function") {
+                        propValue = state[propValue]
+                    }
                     return {
-                        [propKey]: newPropChildren.join("")
+                        [propKey]: propValue
                     }
                 } else {
                     return {
@@ -269,6 +346,12 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
             acc.className = value
         } else if (key === "for") {
             acc.htmlFor = value
+        } else {
+            const eventNameIndex = lowerCaseSyntheticEvents.indexOf(key)
+            if (eventNameIndex !== -1) {
+                acc[syntheticEvents[eventNameIndex]] = value
+            }
+            acc[key] = value
         }
 
         return acc
