@@ -232,8 +232,17 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
                     .reduce<{ [s: string]: any }[]>((acc: ({ [s: string]: any } | string)[], childTree: (ParseTree | string)) => {
                         return traverseFn(acc, childTree, [ state ])
                     }, [])
-                return {
-                    [propKey]: newPropChildren.join("")
+
+                const propValue = newPropChildren.join("")
+
+                if (propValue.length) {
+                    return {
+                        [propKey]: newPropChildren.join("")
+                    }
+                } else {
+                    return {
+                        [propKey]: null
+                    }
                 }
             }
         })
@@ -242,8 +251,6 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
     })
 
     const normalizedProps = Object.keys(newAttrs).reduce((acc: any, key) => {
-        key = key.toLowerCase()
-
         let value: any = newAttrs[key]
 
         if (typeof type === "string" && (type === "input" || type === "textarea")) {

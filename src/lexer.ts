@@ -92,6 +92,8 @@ export function tokenize(options?: LexerOptions): NodeJS.ReadWriteStream {
         ontext: function pushText(value) {
             pushToken(LexerTokenKind.Text, value)
         }
+    }, {
+        xmlMode: true
     })
 
     return duplexify.obj(parser, tr)
