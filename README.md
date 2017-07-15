@@ -14,7 +14,11 @@ In combination with [React](https://github.com/facebook/react) and [mobx](https:
 
 A `state` can be a simple [`observable`](https://mobx.js.org/refguide/observable.html) value, or a more sophisticated state definition like a [mobx-state-tree](https://github.com/mobxjs/mobx-state-tree).
 
-**More documentation coming soon.**
+# getting started
+
+An in-depth getting started guide can be found here: ["Introducing xūs: A reactive template engine on top of mobx"](https://medium.com/@onurgunduz/introducing-xus-a-reactive-template-engine-on-top-of-mobx-2f9e619edf5a)
+
+If you are curious why I’ve started this project and how this could play a role within a larger framework, take a look at ["Templates, state trees, a school of ‘whatever’ and a state definition language"](https://medium.com/@onurgunduz/state-trees-templates-a-school-of-whatever-and-a-state-definition-language-5da02666dde0).
 
 # install
 
@@ -98,6 +102,8 @@ xus(template, state, options, function(er, newElement) {
 [See the full example here.](https://tetsuo.github.io/xus/demo.html)
 
 [See example on CodePen.](https://codepen.io/anon/pen/Xgxqqb)
+
+See also ["Introducing xūs: A reactive template engine on top of mobx"](https://medium.com/@onurgunduz/introducing-xus-a-reactive-template-engine-on-top-of-mobx-2f9e619edf5a) for a detailed explanation of this example.
 
 # language semantics
 
