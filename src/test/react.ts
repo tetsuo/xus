@@ -477,10 +477,34 @@ test("mobx-state-tree section context", t => {
 })
 
 test("self closing tags", t => {
-    build("<form><input type=text /><input type=submit /><hr /></form>", {}, options, (er, el, html) => {
+    build("<form key=ehlo><input key=bla type=text /><input key=foo type=submit /><hr key=xx /></form>", {}, options, (er, el, html) => {
         t.error(er, html)
         const w = shallow(el)
         t.equal(w.html(), '<form><input type="text"/><input type="submit"/><hr/></form>')
+        t.end()
+    })
+})
+
+test("custom components props.state scope", t => {
+    function bar(props) {
+        return React.createElement("i", {}, props.state.x)
+    }
+
+    const state = observable({
+        x: 555,
+        y: {
+            x: 666
+        }
+    })
+
+    build("<p>{x}<bar></bar>{#y}<bar></bar>{/y}<bar></bar></p>", state, {
+        ...options,
+        ...{ registry: { bar } }
+    }
+    , (er, el, html) => {
+        t.error(er, html)
+        const w = shallow(el)
+        t.equal(w.html(), "<p>555<i>555</i><i>666</i><i>555</i></p>")
         t.end()
     })
 })

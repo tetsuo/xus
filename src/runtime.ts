@@ -365,7 +365,12 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
             }, [])
     }
 
-    return createElement(type, normalizedProps, children)
+    return createElement(
+        type,
+        typeof type === "function"
+            ? { state, ...normalizedProps } /* state is passed as 'state' prop to custom components only */
+            : normalizedProps,
+        children)
 }
 
 /**
