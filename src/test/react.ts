@@ -508,3 +508,32 @@ test("custom components props.state scope", t => {
         t.end()
     })
 })
+
+test("array scope with self closing tags", t => {
+    function foo(props) {
+        return React.createElement("p", {}, props.children)
+    }
+
+    function bar(props) {
+        return React.createElement("i", {}, props.state.x)
+    }
+
+    const state = observable({
+        x: 555,
+        y: [
+            { x: 777 },
+            { x: 999 }
+        ]
+    })
+
+    build("<foo>{x}<bar />{#y}<bar />{/y}{x}</foo>", state, {
+        ...options,
+        ...{ registry: { foo: foo, bar: bar } }
+    }
+    , (er, el, html) => {
+        t.error(er, html)
+        const w = shallow(el)
+        t.equal(w.html(), "<p>555<i>555</i><i>777</i><i>999</i>555</p>")
+        t.end()
+    })
+})
