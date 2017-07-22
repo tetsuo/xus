@@ -4,7 +4,7 @@
 		"declaration": true,
 		"module": "commonjs",
 		"outDir": "lib",
-		"target": "es5",
+		"target": "es2016",
 		"jsx": "react",
 		"experimentalDecorators": true,
 		"noUnusedLocals": true,

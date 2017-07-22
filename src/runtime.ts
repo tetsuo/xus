@@ -91,6 +91,8 @@ const syntheticEvents = [
 const lowerCaseSyntheticEvents =
     syntheticEvents.map(d => d.toLowerCase())
 
+const treeIdsByState = new WeakMap()
+
 /**
  * A `TemplateContext` is a `Function` that has a local value of a [[ParseTree]].
  *
@@ -364,6 +366,16 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
                 return traverseChildren(acc, childTree, [ state ])
             }, [])
     }
+
+    let id = String(parseTree[ParseTreeIndex.Identifier] as number)
+
+    if (!treeIdsByState.has(state)) {
+        treeIdsByState.set(state, Math.random().toString(16).split("0.")[1])
+    }
+
+    id = id + "-" + treeIdsByState.get(state)
+
+    normalizedProps.key = id
 
     return createElement(
         type,
