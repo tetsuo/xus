@@ -91,6 +91,8 @@ const syntheticEvents = [
 const lowerCaseSyntheticEvents =
     syntheticEvents.map(d => d.toLowerCase())
 
+const treeIdsByState = new WeakMap()
+
 /**
  * A `TemplateContext` is a `Function` that has a local value of a [[ParseTree]].
  *
@@ -108,14 +110,14 @@ export enum ParseTreeIndex {
     Kind = 0, Tag = 0,
     Attrs = 1, Variable = 1,
     Children = 2,
-    Parent = 3
+    Parent = 3, Identifier = 3
 }
 
 export interface ParseTree extends Array<any> {
     0: ParseTreeKind | string /* tag name */
     1: ({ [s: string]: ParseTree[] } | null) /* props */ | string /* node ref (section/variable names) */
     2?: ParseTree[] /* children */
-    3?: ParseTree /* parent */
+    3?: ParseTree /* parent */ | number /* Identifier */
 }
 
 export interface VisitorOptions<U> {
@@ -365,7 +367,22 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
             }, [])
     }
 
-    return createElement(type, normalizedProps, children)
+    let id = String(parseTree[ParseTreeIndex.Identifier] as number)
+
+    if (!treeIdsByState.has(state)) {
+        treeIdsByState.set(state, Math.random().toString(16).split("0.")[1])
+    }
+
+    id = id + "-" + treeIdsByState.get(state)
+
+    normalizedProps.key = id
+
+    return createElement(
+        type,
+        typeof type === "function"
+            ? { state, ...normalizedProps } /* state is passed as 'state' prop to custom components only */
+            : normalizedProps,
+        children)
 }
 
 /**

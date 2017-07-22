@@ -12,7 +12,8 @@ const randomFixtures = [
                 class: [ [ 3, "foo" ] ],
                 for: [ [ 3, "foo" ], " ", [ 3, "bar" ] ]
             },
-            [ [ 3, "bar" ] ]
+            [ [ 3, "bar" ] ],
+            1
         ]
     },
     {
@@ -20,7 +21,7 @@ const randomFixtures = [
         html: '<x><d>bla</d> {#foo} <y> <z>bom <c>{qux} {sox}</c><k></k></z>{quux} </y>bum {#bar}555<r></r><u></u>{/bar} 888{/foo} <k></k>333<d>{#qux}999{/qux}<h x="{nope}"></h></d> {jj}{dd}uu</x>',
         expected: [ "x", {},
             [
-                [ "d", {}, [ "bla" ] ],
+                [ "d", {}, [ "bla" ], 1 ],
                 " ",
                 [ 2,
                 "foo",
@@ -37,34 +38,34 @@ const randomFixtures = [
                                 [ 3, "qux" ],
                                 " ",
                                 [ 3, "sox" ]
-                            ]
+                            ], 2
                             ],
-                            [ "k", {}, [] ]
-                        ]
+                            [ "k", {}, [], 3 ]
+                        ], 4
                         ],
                         [ 3, "quux" ],
                         " "
-                    ]
+                    ], 5
                     ],
                 "bum ",
                 [ 2, "bar",
                     [
                     "555",
-                    [ "r", {}, [] ],
-                    [ "u", {}, [] ]
+                    [ "r", {}, [], 6 ],
+                    [ "u", {}, [], 7 ]
                     ]
                 ],
                 " 888" ]
                 ],
                 " ",
-                [ "k", {}, [] ],
+                [ "k", {}, [], 8 ],
                 "333",
-                [ "d", {}, [ [ 2, "qux", [ "999" ] ], [ "h", { x: [ [ 3, "nope" ] ] }, [] ] ] ],
+                [ "d", {}, [ [ 2, "qux", [ "999" ] ], [ "h", { x: [ [ 3, "nope" ] ] }, [], 9 ] ], 10 ],
                 " ",
                 [ 3, "jj" ],
                 [ 3, "dd" ],
                 "uu"
-            ]
+            ], 11
         ]
     },
     {
@@ -73,8 +74,8 @@ const randomFixtures = [
             "tr",
             { bg: [ [ 2, "hasx", [ [ 3, "x" ] ] ] ] }, /* props */
             [
-                [ "td", { bg: [ [ 3, "name" ] ], ag: [ [ 3, "name" ], " is" ] }, [] /* no children */ ]
-            ]
+                [ "td", { bg: [ [ 3, "name" ] ], ag: [ [ 3, "name" ], " is" ] }, [] /* no children */, 1 ]
+            ], 2
         ]
     }
 ]
