@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>xūs todos demo</title>
+        <!--you should consider browserifying all of these (see: https://github.com/tetsuo/xusify)-->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.min.js"></script>
+        <script src="//unpkg.com/mobx@3.1.16/lib/mobx.umd.js"></script>
+        <script src="//unpkg.com/mobx-react@4.2.2"></script>
+        <script src="//unpkg.com/mobx-state-tree@0.8.2/dist/mobx-state-tree.umd.js"></script>
+        <script src="//unpkg.com/xus@latest/dist/xus.js"></script>
+        <script src="//unpkg.com/mobx-react-devtools"></script>
+        <style>
+            ul, li {
+                background: #fff;
+            }
+            .finished {
+                background-color: aquamarine;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>xūs todos subtasks demo</h1>
+
+        <div id="main" style="display: none">
+            <div>
+                <form onsubmit="add">
+                    <input type="text" id="input" />
+                    <input type="submit" value="Add task" />
+                </form>
+                <p>You have completed <b>{completedCount}</b> of your tasks. Congratulations!</p>
+                <ul>
+                    {#todos}
+                        <li class="{#done}finished{/done}">
+                            {title}
+                            <ul class="white-bg">
+                                {#subtasks}
+                                    <li class="{#done}finished{/done}">
+                                        <input type="checkbox" checked="{done}" onclick="toggle" />
+                                        {title}
+                                    </li>
+                                {/subtasks}
+                            </ul>
+                        </li>
+                    {/todos}
+                </ul>
+                <devtools></devtools>
+            </div>
+        </div>
+
+        <hr />
+
+        <p><a href="https://github.com/tetsuo/xus/blob/master/examples/demo.html">source</a></p>
+        <p><a href="https://tetsuo.github.io/xus/">xūs API homepage</a></p>
+
+        <script>
+            const types = mobxStateTree.types
+
+            const SubTask = types.model("SubTask", {
+                title: types.string,
+                done: true
+            }, {
+                toggle() {
+                    this.done = !this.done
+                }
+            })
+
+            const Todo = types.model("Todo", {
+                title: types.string,
+                subtasks: types.array(SubTask),
+                get completedSubTaskCount() {
+                    return this.subtasks.reduce((count, task) => (task.done ? count + 1 : count), 0)
+                },
+                get done() {
+                    if (!this.subtasks) {
+                        return false
+                    }
+                    return this.completedSubTaskCount === this.subtasks.length
+                }
+            })
+
+            const State = types.model("State", {
+                todos: types.array(Todo),
+                get completedCount() {
+                    return this.todos.reduce((count, todo) => (todo.done ? count + 1 : count), 0)
+                }
+            }, {
+                add(event) {
+                    event.preventDefault()
+
+                    const currentTarget = event.currentTarget
+                    const input = currentTarget.querySelector("input[type=text]")
+
+                    if (!input.value.length) {
+                        return
+                    }
+
+                    this.todos.unshift({
+                        title: input.value,
+                        done: false,
+                        subtasks: [
+                            { title: "foo", done: false },
+                            { title: "bar", done: true }
+                        ]
+                    })
+
+                    input.value = ""
+                }
+            })
+
+            const state = State.create({
+                todos: [
+                    {
+                        title: "Get coffee",
+                        subtasks: [
+                            { title: "Run the machine", done: false },
+                            { title: "Wait for coffee", done: false }
+                        ]
+                    },
+                    {
+                        title: "Wake up",
+                        subtasks: [
+                            { title: "Close the alarm", done: true },
+                            { title: "Wake up", done: true }
+                        ]
+                    }
+                ]
+            })
+
+            var targetElement = document.getElementById("main")
+
+            var options = {
+                createElement: React.createElement,
+                observer: mobxReact.observer,
+                registry: {
+                    devtools: mobxDevtools.default
+                }
+            }
+
+            // ...aaand, action!
+            xus(targetElement.innerHTML, state, options, (er, newElement) => {
+                if (er) throw er
+
+                ReactDOM.render(newElement, targetElement)
+
+                document.getElementById("main").style.display = "block"
+
+                document.getElementById("input").focus()
+            })
+        </script>
+    </body>
+</html>
