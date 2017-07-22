@@ -332,7 +332,7 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
     const normalizedProps = Object.keys(newAttrs).reduce((acc: any, key) => {
         let value: any = newAttrs[key]
 
-        let omitInputProps = false
+        let isInput = false
 
         if (typeof type === "string" && (type === "input" || type === "textarea")) {
             if (newAttrs.hasOwnProperty("checked")) {
@@ -345,7 +345,7 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
                 }
             }
             if (type === "input") {
-                omitInputProps = true
+                isInput = true
             }
         }
 
@@ -357,8 +357,14 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
             const eventNameIndex = lowerCaseSyntheticEvents.indexOf(key)
             if (eventNameIndex !== -1) {
                 acc[syntheticEvents[eventNameIndex]] = value
-            } else if (omitInputProps && ([ "checked", "value" ].indexOf(key) === -1)) {
-                acc[key] = value
+            } else {
+                if (isInput) {
+                    if (([ "checked", "value" ].indexOf(key) === -1)) {
+                        acc[key] = value
+                    }
+                } else {
+                    acc[key] = value
+                }
             }
         }
 
