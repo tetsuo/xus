@@ -378,16 +378,6 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
             }, [])
     }
 
-    let id = String(parseTree[ParseTreeIndex.Identifier] as number)
-
-    if (!treeIdsByState.has(state)) {
-        treeIdsByState.set(state, Math.random().toString(16).split("0.")[1])
-    }
-
-    id = id + "-" + treeIdsByState.get(state)
-
-    normalizedProps.key = id
-
     return createElement(
         type,
         typeof type === "function"
@@ -444,12 +434,23 @@ export function render<P>(ctx: TemplateContext<React.ReactElement<P>>, state: { 
             ? registry[type]
             : registry.ObserverComponent
 
+        let id = String(options.parseTree[ParseTreeIndex.Identifier] as number)
+
+        const nodeState = options.state[options.state.length - 1]
+
+        if (!treeIdsByState.has(nodeState)) {
+            treeIdsByState.set(nodeState, Math.random().toString(16).split("0.")[1])
+        }
+
+        id = id + "-" + treeIdsByState.get(nodeState)
+
         return createElement(
             factory,
             {
                 ...options,
                 ...{
-                    state: options.state[options.state.length - 1]
+                    state: nodeState,
+                    key: id
                 }
             },
             children)
