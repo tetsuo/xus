@@ -13,6 +13,8 @@ export function parse(): NodeJS.ReadWriteStream {
     let cursor: ParseTree = null
     let top: (ParseTree | string /* text node */)[][] = []
 
+    let treeCount = 0
+
     return through.obj(function(token: LexerToken, enc, next) {
         let node: ParseTree | string /* text node */
 
@@ -77,12 +79,13 @@ export function parse(): NodeJS.ReadWriteStream {
                     state = ParserState.InText
                     cursor = null
                     top = []
-                    write(node.slice(0, -1))
+                    node.splice(-1, 1, ++treeCount)
+                    write(node)
                 } else {
                     state = ParserState.InTag
-                    cursor = cursor[ParseTreeIndex.Parent]
+                    cursor = cursor[ParseTreeIndex.Parent] as ParseTree
                     top.pop()
-                    node.splice(-1, 1)
+                    node.splice(-1, 1, ++treeCount)
                 }
 
                 break

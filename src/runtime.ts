@@ -108,14 +108,14 @@ export enum ParseTreeIndex {
     Kind = 0, Tag = 0,
     Attrs = 1, Variable = 1,
     Children = 2,
-    Parent = 3
+    Parent = 3, Identifier = 3
 }
 
 export interface ParseTree extends Array<any> {
     0: ParseTreeKind | string /* tag name */
     1: ({ [s: string]: ParseTree[] } | null) /* props */ | string /* node ref (section/variable names) */
     2?: ParseTree[] /* children */
-    3?: ParseTree /* parent */
+    3?: ParseTree /* parent */ | number /* Identifier */
 }
 
 export interface VisitorOptions<U> {
