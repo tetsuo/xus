@@ -344,9 +344,8 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
                     visitChildren = false
                 }
             }
-            if (type === "input") {
-                isInput = true
-            }
+
+            isInput = true
         }
 
         if (key === "class") {
