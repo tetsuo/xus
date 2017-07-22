@@ -12,7 +12,7 @@
   "scripts": {
     "build": "npm run clean && tsc",
     "clean": "rm -fr lib dist",
-    "dist": "npm run build && mkdir -p dist && NODE_ENV=production browserify index.js -s xus | uglifyjs -cm > dist/xus.js",
+    "dist": "npm run build && mkdir -p dist && browserify -g [ envify --NODE_ENV production ] index.js -s xus | uglifyjs -cm > dist/xus.js",
     "docs": "rm -fr examples/api && typedoc --includeDeclarations --name 'xūs API' --gaID 'UA-1238030-11' --gaSite 'tetsuo/xus' --out docs --mode file --excludePrivate --excludeNotExported --excludeExternals --theme node_modules/typedoc-theme --exclude '**/test/**' --jsx react src",
     "prepublish": "npm run build && npm run test && npm run dist",
     "test": "tape lib/**/test/*.js",
@@ -38,6 +38,7 @@
     "@types/tape": "^4.2.30",
     "@types/through2": "^2.0.33",
     "browserify": "^14.4.0",
+    "envify": "^4.1.0",
     "enzyme": "^2.9.1",
     "mobx": "^3.1.16",
     "mobx-react": "^4.2.1",
