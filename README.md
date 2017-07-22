@@ -101,8 +101,6 @@ xus(template, state, options, function(er, newElement) {
 
 [See the full example here.](https://tetsuo.github.io/xus/demo.html)
 
-[See example on CodePen.](https://codepen.io/anon/pen/Xgxqqb)
-
 See also ["Introducing xūs: A reactive template engine on top of mobx"](https://medium.com/@onurgunduz/introducing-xus-a-reactive-template-engine-on-top-of-mobx-2f9e619edf5a) for a detailed explanation of this example.
 
 # language semantics
