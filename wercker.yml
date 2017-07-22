@@ -24,6 +24,8 @@ build:
             cp -R examples/* docs
 
 deploy:
+  box:
+    id: tetsuo/electron-ready:4
   steps:
     - install-packages:
         packages: git ssh-client
