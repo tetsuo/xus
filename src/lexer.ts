@@ -18,7 +18,7 @@ export interface LexerToken extends Array<any> {
 }
 
 export enum LexerTokenIndex {
-  Kind = 0, TextNode = 0, VariableVariable = 0, SectionVariable = 0,
+  Kind = 0, TextNode = 0, VariableName = 0, SectionName = 0,
   Body = 1,
   Attrs = 2
 }

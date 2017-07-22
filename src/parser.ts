@@ -113,7 +113,7 @@ export function parse(): NodeJS.ReadWriteStream {
 
                 node = [
                     ParseTreeKind.Variable,
-                    token[LexerTokenIndex.VariableVariable] as string /* section/variable reference */
+                    token[LexerTokenIndex.VariableName] as string /* section/variable reference */
                 ]
 
                 top[top.length - 1].push(node)
@@ -128,7 +128,7 @@ export function parse(): NodeJS.ReadWriteStream {
 
                 node = [
                     ParseTreeKind.Section,
-                    token[LexerTokenIndex.SectionVariable] as string /* section reference */, []
+                    token[LexerTokenIndex.SectionName] as string /* section reference */, []
                 ]
 
                 top.push(node[ParseTreeIndex.Children])
