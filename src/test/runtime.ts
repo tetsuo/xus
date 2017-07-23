@@ -121,6 +121,56 @@ const fixtures = [
                 "89"
             ]
         }
+    },
+    {
+        html: "<x>{^s}foo{/s}</x>",
+        state: {
+            s: true
+        },
+        expected: {
+            tag: "x",
+            props: {},
+            children: [
+            ]
+        }
+    },
+    {
+        html: "<x>{^s}foo{/s}</x>",
+        state: {
+            s: false
+        },
+        expected: {
+            tag: "x",
+            props: {},
+            children: [
+                "foo"
+            ]
+        }
+    },
+    {
+        html: "<x>{^s}foo{/s}</x>",
+        state: {
+            s: []
+        },
+        expected: {
+            tag: "x",
+            props: {},
+            children: [
+                "foo"
+            ]
+        }
+    },
+    {
+        html: "<x>{^s}{x}{/s}</x>",
+        state: {
+            s: { x: 1 }
+        },
+        expected: {
+            tag: "x",
+            props: {},
+            children: [
+            ]
+        }
     }
 ]
 
