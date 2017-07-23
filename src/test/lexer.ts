@@ -167,3 +167,34 @@ test("tokenize attrs", t => {
             t.deepEqual(data, x)
         })
 })
+
+test("tokenize inverted sections", t => {
+    const html =
+`<x>
+  {^fruits}
+    <k></k>
+  {/fruits}
+</x>`
+
+    const expected = [
+        [ 1, "x", {} ],
+        [ 3, "\n  " ],
+        [ 7, "fruits" ],
+        [ 3, "\n    " ],
+        [ 1, "k", {} ],
+        [ 2, "k" ],
+        [ 3, "\n  " ],
+        [ 6, "fruits" ],
+        [ 3, "\n" ],
+        [ 2, "x" ]
+    ]
+
+    t.plan(expected.length)
+
+    util.fromString(html)
+        .pipe(lexer.tokenize())
+        .on("data", data => {
+            const x = expected.shift()
+            t.deepEqual(data, x)
+        })
+})

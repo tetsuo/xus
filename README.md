@@ -103,9 +103,9 @@ xus(template, state, options, function(er, newElement) {
 
 See also ["Introducing xūs: A reactive template engine on top of mobx"](https://medium.com/@onurgunduz/introducing-xus-a-reactive-template-engine-on-top-of-mobx-2f9e619edf5a) for a detailed explanation of this example.
 
-# language semantics
+# language
 
-As of this writing, xūs only supports a minimal set of [mustache spec](http://mustache.github.io/mustache.5.html) that covers variable interpolation and sections only. More stuff will be coming soon, stay tuned!
+xūs supports [mustache spec](http://mustache.github.io/mustache.5.html) with the exception of lambdas and partials.
 
 ## variables
 
@@ -128,6 +128,8 @@ output:
 ```
 <h1>Paul Atreides</h1>
 ```
+
+Note that, xūs does not recursively check the parent contexts if `name` key is not found.
 
 ## sections
 
@@ -177,6 +179,36 @@ output:
     Mango
   </li>
 </ul>
+```
+
+## inverted sections
+
+Inverted sections may render text *once* based on the inverse value of the key. That is, they will be rendered if the key doesn't exist, is false, or is an empty list.
+
+template:
+
+```
+<div>
+  {^fruits}
+    No fruits :(
+  {/fruits}
+</div>
+```
+
+state:
+
+```json
+{
+  "fruits": []
+}
+```
+
+output:
+
+```
+<div>
+  No fruits :(
+</div>
 ```
 
 # registry mechanism

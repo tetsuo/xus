@@ -16,15 +16,15 @@ export function parse(): NodeJS.ReadWriteStream {
     let treeCount = 0
 
     return through.obj(function(token: LexerToken, enc, next) {
-        let node: ParseTree | string /* text node */
-
         const self = this
+        const kind = token.shift()
 
+        let node: ParseTree | string /* text node */
         let pending = false
 
         function write(newNode: any[]) { self.push(newNode) }
 
-        switch (token.shift()) {
+        switch (kind) {
             case LexerTokenKind.Open:
                 node = token.concat([
                     [] /* children */,
@@ -113,13 +113,14 @@ export function parse(): NodeJS.ReadWriteStream {
 
                 node = [
                     ParseTreeKind.Variable,
-                    token[LexerTokenIndex.VariableVariable] as string /* section/variable reference */
+                    token[LexerTokenIndex.VariableName] as string /* section/variable reference */
                 ]
 
                 top[top.length - 1].push(node)
 
                 break
 
+            case LexerTokenKind.InvertedSectionOpen:
             case LexerTokenKind.SectionOpen:
                 if (state === ParserState.InText) {
                     this.emit("error", new Error("top-level section"))
@@ -127,8 +128,10 @@ export function parse(): NodeJS.ReadWriteStream {
                 }
 
                 node = [
-                    ParseTreeKind.Section,
-                    token[LexerTokenIndex.SectionVariable] as string /* section reference */, []
+                    kind === LexerTokenKind.SectionOpen
+                        ? ParseTreeKind.Section
+                        : ParseTreeKind.InvertedSection,
+                    token[LexerTokenIndex.SectionName] as string /* section reference */, []
                 ]
 
                 top.push(node[ParseTreeIndex.Children])

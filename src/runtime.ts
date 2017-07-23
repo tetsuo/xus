@@ -103,7 +103,8 @@ export type TemplateContext<U> = (state: any, options: RenderOptions<U>, ctor?: 
 
 export enum ParseTreeKind {
     Section = 2,
-    Variable
+    Variable = 3,
+    InvertedSection = 4
 }
 
 export enum ParseTreeIndex {
@@ -218,32 +219,44 @@ export class Template<U> implements TemplateInterface<U> {
             } else {
                 children.push(element)
             }
-        } else if (node[ParseTreeIndex.Kind] === ParseTreeKind.Section) {
+        } else if ([ ParseTreeKind.Section, ParseTreeKind.InvertedSection ].indexOf(node[ParseTreeIndex.Kind] as number) !== -1) {
             const tail = top[top.length - 1]
             const value = tail[node[ParseTreeIndex.Variable] as string]
 
+            const notInverted = (node[ParseTreeIndex.Kind] as number) !== ParseTreeKind.InvertedSection
+
             if (isBoolean(value)) {
-                if (!value) {
+                if ((notInverted && !value) || (!notInverted && value)) {
                     return children
                 }
                 top.push(tail)
                 this._reduceTree(node, top, children)
                 top.pop()
             } else if (isArray(value)) {
-                if (value.length === 0) {
+                if ((notInverted && value.length === 0) || (!notInverted && value.length > 0)) {
                     return children
                 }
                 top.push(value)
-                value.forEach((item) => {
-                    top.push(item)
+                if (notInverted) {
+                    value.forEach((item) => {
+                        top.push(item)
+                        this._reduceTree(node, top, children)
+                        top.pop()
+                    })
+                } else {
                     this._reduceTree(node, top, children)
-                    top.pop()
-                })
+                }
+
                 top.pop()
             } else if (isObject(value)) {
+                if (!notInverted) {
+                    return children
+                }
                 top.push(value)
                 this._reduceTree(node, top, children)
                 top.pop()
+            } else if (typeof value === "string" || typeof value === "number") {
+                throw new Error("invalid section type: string")
             } else {
                 throw new Error("could not determine section type")
             }

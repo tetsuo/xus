@@ -4,11 +4,12 @@ const duplexify = require("duplexify")
 
 export enum LexerTokenKind {
     Open = 1,
-    Close,
-    Text,
-    Variable,
-    SectionOpen,
-    SectionClose
+    Close = 2,
+    Text = 3,
+    Variable = 4,
+    SectionOpen = 5,
+    SectionClose = 6,
+    InvertedSectionOpen = 7
 }
 
 export interface LexerToken extends Array<any> {
@@ -18,7 +19,7 @@ export interface LexerToken extends Array<any> {
 }
 
 export enum LexerTokenIndex {
-  Kind = 0, TextNode = 0, VariableVariable = 0, SectionVariable = 0,
+  Kind = 0, TextNode = 0, VariableName = 0, SectionName = 0,
   Body = 1,
   Attrs = 2
 }
@@ -30,11 +31,12 @@ export interface LexerOptions {
 }
 
 const defaultSplitter = /({[^}]+})/
-const defaultMatcher = /^{\s*([#\/]?)(\w+)\s*}$/
+const defaultMatcher = /^{\s*([#\/\^]?)(\w+)\s*}$/
 const defaultSymbolMap = {
   "" : LexerTokenKind.Variable,
   "#": LexerTokenKind.SectionOpen,
-  "/": LexerTokenKind.SectionClose
+  "/": LexerTokenKind.SectionClose,
+  "^": LexerTokenKind.InvertedSectionOpen
 }
 
 /**
