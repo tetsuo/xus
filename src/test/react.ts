@@ -361,7 +361,7 @@ test("component registry", t => {
     const state = { n: 1 }
 
     function foo(props) {
-        return React.createElement("c", props, React.createElement("b", {}, "bold"), props.children)
+        return React.createElement("c" as any, { className: props.className }, React.createElement("b", {}, "bold"), props.children)
     }
 
     const optionsWithRegistry = {
