@@ -77,6 +77,16 @@ const randomFixtures = [
                 [ "td", { bg: [ [ 3, "name" ] ], ag: [ [ 3, "name" ], " is" ] }, [] /* no children */, 1 ]
             ], 2
         ]
+    },
+    {
+        html: '<tr bg="{#hasx}{x}{/hasx}{^noty}{x}{/noty}"><td bg={name} ag="{name} is" /></tr>',
+        expected: [
+            "tr",
+            { bg: [ [ 2, "hasx", [ [ 3, "x" ] ] ], [ 4, "noty", [ [ 3, "x" ] ] ] ] }, /* props */
+            [
+                [ "td", { bg: [ [ 3, "name" ] ], ag: [ [ 3, "name" ], " is" ] }, [] /* no children */, 1 ]
+            ], 2
+        ]
     }
 ]
 
