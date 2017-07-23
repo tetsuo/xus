@@ -211,6 +211,24 @@ output:
 </div>
 ```
 
+## comments
+
+Comments begin with a bang and are ignored.
+
+template:
+
+```
+<h1>Today{! ignore me }.</h1>
+```
+
+will render as follows:
+
+```
+<h1>Today.</h1>
+```
+
+Comments may contain newlines.
+
 # registry mechanism
 
 You can pass in your own component factories in `options.registry`.

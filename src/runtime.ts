@@ -104,7 +104,8 @@ export type TemplateContext<U> = (state: any, options: RenderOptions<U>, ctor?: 
 export enum ParseTreeKind {
     Section = 2,
     Variable = 3,
-    InvertedSection = 4
+    InvertedSection = 4,
+    Comment = 5
 }
 
 export enum ParseTreeIndex {

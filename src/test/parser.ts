@@ -87,6 +87,18 @@ const randomFixtures = [
                 [ "td", { bg: [ [ 3, "name" ] ], ag: [ [ 3, "name" ], " is" ] }, [] /* no children */, 1 ]
             ], 2
         ]
+    },
+    {
+        html: "<tr>{! ehlo this is comment }</tr>",
+        expected: [ "tr", {}, [ [ 5, " ehlo this is comment " ] ], 1 ]
+    },
+    {
+        html:
+`<tr>{!
+    testing multiline comment
+    ehlo this is comment
+}</tr>`,
+        expected: [ "tr", {}, [ [ 5, "\n    testing multiline comment\n    ehlo this is comment\n" ] ], 1 ]
     }
 ]
 
