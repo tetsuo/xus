@@ -9,7 +9,8 @@ export enum LexerTokenKind {
     Variable = 4,
     SectionOpen = 5,
     SectionClose = 6,
-    InvertedSectionOpen = 7
+    InvertedSectionOpen = 7,
+    Comment = 8
 }
 
 export interface LexerToken extends Array<any> {
@@ -19,24 +20,17 @@ export interface LexerToken extends Array<any> {
 }
 
 export enum LexerTokenIndex {
-  Kind = 0, TextNode = 0, VariableName = 0, SectionName = 0,
+  Kind = 0, TextNode = 0, VariableName = 0, SectionName = 0, Comment = 0,
   Body = 1,
   Attrs = 2
 }
 
-export interface LexerOptions {
-  matcher?: RegExp
-  splitter?: RegExp
-  symbolMap?: { [s: string]: LexerTokenKind }
-}
-
-const defaultSplitter = /({[^}]+})/
-const defaultMatcher = /^{\s*([#\/\^]?)(\w+)\s*}$/
 const defaultSymbolMap = {
   "" : LexerTokenKind.Variable,
   "#": LexerTokenKind.SectionOpen,
   "/": LexerTokenKind.SectionClose,
-  "^": LexerTokenKind.InvertedSectionOpen
+  "^": LexerTokenKind.InvertedSectionOpen,
+  "!": LexerTokenKind.Comment
 }
 
 /**
@@ -44,7 +38,7 @@ const defaultSymbolMap = {
  *
  * @param options  Override the symbol map and default matchers.
  */
-export function tokenize(options?: LexerOptions): NodeJS.ReadWriteStream {
+export function tokenize(): NodeJS.ReadWriteStream {
     const tr = through.obj()
 
     function pushToken(kind: LexerTokenKind, value: string, attrs?: { [s: string]: any }) {
@@ -54,7 +48,7 @@ export function tokenize(options?: LexerOptions): NodeJS.ReadWriteStream {
         }
 
         if (kind === LexerTokenKind.Text) {
-            scan(value, options, function(er, scanKind, body) {
+            scan(value, function(er, scanKind, body) {
                 if (er) {
                     return void tr.emit(er.message)
                 }
@@ -65,7 +59,7 @@ export function tokenize(options?: LexerOptions): NodeJS.ReadWriteStream {
 
             Object.keys(attrs).forEach(attrKey => {
                 const attrTree = []
-                scan(attrs[attrKey], options, function(er, scanKind, body) {
+                scan(attrs[attrKey], function(er, scanKind, body) {
                     if (er) {
                         return void tr.emit(er.message)
                     }
@@ -95,7 +89,7 @@ export function tokenize(options?: LexerOptions): NodeJS.ReadWriteStream {
             pushToken(LexerTokenKind.Text, value)
         }
     }, {
-        xmlMode: false, /* XXX: attribute names are being inconsistently lowercased (or not) in the browser */
+        xmlMode: false, /* case-insensitive */
         recognizeSelfClosing: true
     })
 
@@ -108,12 +102,12 @@ export function tokenize(options?: LexerOptions): NodeJS.ReadWriteStream {
  * @param s   Text to be scanned.
  * @param cb  Callback will be called for each seen tag.
  */
-function scan(s: string, opts: LexerOptions = {}, cb: (er: Error|null, kind?: LexerTokenKind, body?: string) => void): void {
+function scan(s: string, cb: (er: Error|null, kind?: LexerTokenKind, body?: string) => void): void {
   let i = -1
   let text = ""
   let match: RegExpMatchArray
   let token: string
-  let tokens = s.split(opts.splitter || defaultSplitter)
+  let tokens = s.split(/({[^}]+})/)
 
   while (++i < tokens.length) {
     token = tokens[i]
@@ -121,13 +115,25 @@ function scan(s: string, opts: LexerOptions = {}, cb: (er: Error|null, kind?: Le
     if (0 !== i % 2) {
       free()
 
-      match = token.match(opts.matcher || defaultMatcher)
+      match = token.match(/^{\s*([#\/\^\!]?)([\s\S]+)s*}$/)
 
       if (!match) {
         return void cb(new Error(`scan error: ${token}`))
       }
 
-      cb(null, (opts.symbolMap || defaultSymbolMap)[match[1]], match[2])
+      let type = (defaultSymbolMap)[match[1]]
+      let data = match[2] as RegExpMatchArray | string
+
+      if (type !== LexerTokenKind.Comment) {
+          data = (data as string).match(/^\s*(\w+)\s*$/)
+          if (!data) {
+              return void cb(new Error(`could not determine key name: ${token}`))
+          } else {
+              data = data[1]
+          }
+      }
+
+      cb(null, type, data as string)
     } else {
       text += token
     }

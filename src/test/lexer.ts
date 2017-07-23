@@ -198,3 +198,30 @@ test("tokenize inverted sections", t => {
             t.deepEqual(data, x)
         })
 })
+
+test("tokenize comments", t => {
+    const html =
+`<x>{   ! testasdsla
+ sps os o s
+}{  # ehlo }{  /ehlo }</x>`
+
+    const expected = [
+        [1, "x", {}],
+        [8, " testasdsla\n sps os o s\n"],
+        [5, "ehlo"],
+        [6, "ehlo"],
+        [2, "x"]
+    ]
+
+    t.plan(expected.length)
+
+    util.fromString(html)
+        .pipe(lexer.tokenize())
+        .on("error", er => {
+            console.log(er)
+        })
+        .on("data", data => {
+            const x = expected.shift()
+            t.deepEqual(data, x)
+        })
+})

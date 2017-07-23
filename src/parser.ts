@@ -144,6 +144,16 @@ export function parse(): NodeJS.ReadWriteStream {
 
                 break
 
+            case LexerTokenKind.Comment:
+                node = [
+                    ParseTreeKind.Comment,
+                    (token[LexerTokenIndex.Comment] as string)
+                ]
+
+                top[top.length - 1].push(node)
+
+                break
+
             default:
         }
 
