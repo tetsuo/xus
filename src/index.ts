@@ -1,4 +1,4 @@
-import { tokenize } from "./lexer"
+import { LexerOptions, tokenize } from "./lexer"
 import { parse } from "./parser"
 import { render, RenderOptions, TemplateContext } from "./runtime"
 import through = require("through2")
@@ -28,13 +28,15 @@ export function xus<P>(template: string, state: { [s: string]: any }, options: R
         throw new Error("you must provide 'createElement' and 'observer'")
     }
 
-    return compile<React.ReactElement<P>>(template, (er, ctx?) => {
+    return compile<React.ReactElement<P>>(template, {}, (er, ctx?) => {
         if (er) {
             return cb(er)
         }
         cb(null, render(ctx, state, options), template)
     })
 }
+
+export type CompileOptions = LexerOptions
 
 /**
  * Given a a xūs template as input, will produce rows of pre-compiled functions that can be
@@ -48,7 +50,7 @@ export function xus<P>(template: string, state: { [s: string]: any }, options: R
  * @param template  xūs template string.
  * @param cb  If provided, the emitted rows are also passed to the callback function.
  */
-export function compile<T>(template: string, cb?: (error: Error, ctx?: TemplateContext<T>) => void): NodeJS.ReadableStream {
+export function compile<T>(template: string, options?: CompileOptions, cb?: (error: Error, ctx?: TemplateContext<T>) => void): NodeJS.ReadableStream {
     const wrapper = through.obj(function(tree, enc, next) {
         this.push((new Function("d" /* state */, "m" /* options */, "t" /* opt template inst */,
             "t=t?new t:this;t.root=" + JSON.stringify(tree) + ";return t.render(d,m)")) as TemplateContext<T>)

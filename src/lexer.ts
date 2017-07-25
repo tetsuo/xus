@@ -93,7 +93,7 @@ export function tokenize(options: LexerOptions = { xmlMode: false }): NodeJS.Rea
             pushToken(LexerTokenKind.Text, value)
         }
     }, {
-        xmlMode: options.xmlMode, /* case-insensitive */
+        xmlMode: options.xmlMode || false, /* case-insensitive */
         recognizeSelfClosing: true
     })
 

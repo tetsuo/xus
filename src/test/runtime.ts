@@ -3,7 +3,7 @@ import { compile } from ".."
 import { Template } from "../runtime"
 
 function build(html: string, state: any, options: any, cb: (buildError, node? , html?: string) => void) {
-    compile(html, (transformError, render?) => {
+    compile(html, {}, (transformError, render?) => {
         if (transformError) {
             return cb(transformError)
         }
