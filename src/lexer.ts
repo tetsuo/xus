@@ -25,6 +25,10 @@ export enum LexerTokenIndex {
   Attrs = 2
 }
 
+export interface LexerOptions {
+    xmlMode?: boolean
+}
+
 const defaultSymbolMap = {
   "" : LexerTokenKind.Variable,
   "#": LexerTokenKind.SectionOpen,
@@ -38,7 +42,7 @@ const defaultSymbolMap = {
  *
  * @param options  Override the symbol map and default matchers.
  */
-export function tokenize(): NodeJS.ReadWriteStream {
+export function tokenize(options: LexerOptions = { xmlMode: false }): NodeJS.ReadWriteStream {
     const tr = through.obj()
 
     function pushToken(kind: LexerTokenKind, value: string, attrs?: { [s: string]: any }) {
@@ -89,7 +93,7 @@ export function tokenize(): NodeJS.ReadWriteStream {
             pushToken(LexerTokenKind.Text, value)
         }
     }, {
-        xmlMode: false, /* case-insensitive */
+        xmlMode: options.xmlMode || false, /* case-insensitive */
         recognizeSelfClosing: true
     })
 

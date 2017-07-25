@@ -376,7 +376,8 @@ function visitObserver<T>(options: RenderOptions<T>, visitorOptions: VisitorOpti
                         acc[key] = value
                     }
                 } else {
-                    acc[key] = value
+                    const asInt = parseInt(value, 10)
+                    acc[key] = isNaN(asInt) ? value : asInt
                 }
             }
         }
