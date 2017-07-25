@@ -57,7 +57,7 @@ export function compile<T>(template: string, options?: CompileOptions, cb?: (err
         next()
     })
 
-    const stream = pumpify.obj(util.fromString(template), tokenize(), parse(), wrapper)
+    const stream = pumpify.obj(util.fromString(template), tokenize(options), parse(), wrapper)
 
     stream.on("data", (ctx: TemplateContext<T>) => {
         if (typeof cb === "function") {
